@@ -1,0 +1,14 @@
+#include <stdio.h>
+
+
+typedef struct _m
+{
+
+  struct _m (*v)(int);
+  
+}m;
+
+void main()
+{
+
+}

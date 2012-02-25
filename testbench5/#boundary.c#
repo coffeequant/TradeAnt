@@ -1,0 +1,25 @@
+
+typedef struct bcond1D
+{
+  double *times;
+  double *values;
+  
+  void init(int count)
+  {
+    
+  }
+  
+
+}boundaryconditions1D;
+
+typedef struct bcond2D
+{
+  double **times;
+  double **values;
+ 
+  void init()
+  {
+
+  }
+
+}boundaryconditions2D;
