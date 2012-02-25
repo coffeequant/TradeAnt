@@ -7,7 +7,7 @@
  TradeAnt is free software: you can redistribute it. Use it at your own risk
 */
 
-
+//Adding 2d flows
 #include "boundary.h"
 
 void initialize_cashflows1d(cashflows1d* bc,int n)
