@@ -10,7 +10,7 @@
 #ifndef _volatility_
 #define _volatility_
 
-#include "dates.h"
+#include <tradeant/dates.h>
 
 typedef struct vol_surface
 {

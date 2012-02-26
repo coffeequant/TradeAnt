@@ -12,7 +12,7 @@
 #define _rates_
 #include <stdio.h>
 #include <stdlib.h>
-#include "dates.h"
+#include <tradeant/dates.h>
 
 //need interest rate and dividend curves both
 typedef struct interestcurve

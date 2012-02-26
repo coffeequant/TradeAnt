@@ -15,3 +15,12 @@ typedef struct _results
   double **theta;
   double **vega;
 }results;
+
+typedef struct _results2d
+{
+  double *prices;
+  double *delta;
+  double *gamma;
+  double *theta;
+  double *vega;
+}results2d;

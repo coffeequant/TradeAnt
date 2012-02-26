@@ -1,4 +1,4 @@
-/* 
+/*
  Copyright (C) 2012 Animesh Saxena
 
  This file is part of TradeAnt, a free-software/open-source library
@@ -8,7 +8,7 @@
 */
 
 #include <stdlib.h>
-#include "marketinstruments.h"
+#include <tradeant/marketinstruments.h>
 #include <gsl/gsl_cdf.h>
 #include <math.h>
 
@@ -21,7 +21,7 @@ void initialize_market_instruments(market_instruments* m)
 	m->set_spot = _set_spot;
 }
 double _gblackscholes(char dtype,double spot,double strike,double maturity,double sigma,double r)
-{	
+{
 	double d1 = (log(spot/strike) + (r +0.5 * sigma * sigma)*maturity)/(sigma*pow(maturity,0.5));
 	double d2 = d1 - sigma * pow(maturity,0.5);
 	double price = 0.0;
@@ -57,7 +57,7 @@ void _set_spot(market_instruments* m,double spot)
 	double error = 0.0005;
 	double pricelow = _gblackscholes(m->dtype,RELSPOT,m->strike,m->maturity,sigmalow,m->rate);
 	double pricehigh = _gblackscholes(m->dtype,RELSPOT,m->strike,m->maturity,sigmahigh,m->rate);
-	
+
 	double sigma = sigmalow + (m->price - pricelow) * (sigmahigh - sigmalow) / (pricehigh - pricelow);
 	while(abs(m->price - _gblackscholes(m->dtype,RELSPOT,m->strike,m->maturity,sigma,m->rate)) > error)
 	{
@@ -69,7 +69,7 @@ void _set_spot(market_instruments* m,double spot)
 		pricehigh =  _gblackscholes(m->dtype,RELSPOT,m->strike,m->maturity,sigmahigh,m->rate);
 		sigma = sigmalow + (m->price - pricelow) * (sigmahigh - sigmalow) / (pricehigh - pricelow);
 	}
-	
+
 	m->volatility = sigma;
 }
 

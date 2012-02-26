@@ -11,7 +11,7 @@
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
 
-#include "volatility.h"
+#include <tradeant/volatility.h>
 
 #define LINELENGTH 1000
 #define SEPARATOR ","

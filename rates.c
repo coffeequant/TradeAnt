@@ -9,8 +9,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "dates.h"
-#include "rates.h"
+#include <tradeant/dates.h>
+#include <tradeant/rates.h>
 #include <string.h>
 
 #define LINELENGTH 1000

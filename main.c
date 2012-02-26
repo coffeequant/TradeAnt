@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "model.h"
+#include <tradeant/blackscholes1d.h>
 
 
 int main()
@@ -36,9 +36,15 @@ int main()
   autocall.set_rates(&autocall,r,r);
 
   results autocallresult = autocall.solve(&autocall);
-
-for(i=1;i<200;i++)
-    printf("AutocallPrice: %d \t %.4f\n",(i*1),autocallresult.prices[i][autocall.nts-1]);
+int j;
+for(j=1;j<autocall.nts;j++)
+{
+	for(i=1;i<200;i++)
+	{
+	    printf("%.4f\t",autocallresult.delta[i][j]);
+	}
+	printf("\n");
+}
 
 
   //done and done - that's all!!
