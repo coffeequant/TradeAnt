@@ -1,6 +1,19 @@
 #include <stdio.h>
-#include <tradeant/blackscholes1d.h>
+#include <tradeant/blackscholes2d.h>
 
+double apply_custom_cashflow(double spot[],double time)
+{
+    double m = (spot[0]>spot[1])?spot[0]:spot[1];
+    //printf("%.2f\n",((m>100)?(m-100):0.0));
+    if(time == 0.0)
+    {
+        //exit(0);
+        return ((m>100)?(m-100):0.0);
+    }
+
+
+    return 0.0;
+}
 
 int main()
 {
@@ -12,51 +25,19 @@ int main()
   rates r;
   initialize_rates(&r);
   r.constantrate = 0.05;
-  blackscholes1d autocall;
-  autocall.expiry = 3.0;
-  autocall.dt = 0.001;
-  autocall.stepsize = 1;
-  autocall.numberofsteps = 200;
+  blackscholes2d bestofcall;
+  bestofcall.expiry = 1.0;
+  bestofcall.dt = 0.01;
+  bestofcall.stepsize = 1;
+  bestofcall.numberofsteps = 200;
 
 
-  initialize_blackscholes1d(&autocall);
-
-  cashflows1d bcs;
-  initialize_cashflows1d(&bcs,6);
-  int i;
-  for(i=0;i<6;i++)
-    {
-      bcs.time[i] = 3.0-(i) *0.25;
-      bcs.value[i] = 30 + (6-i)*5;
-      bcs.barrier[i] = 120;
-    }
-
-  autocall.add_cash_flows(&autocall,bcs);
-  autocall.set_vol_surface(&autocall,v);
-  autocall.set_rates(&autocall,r,r);
-
-  results autocallresult = autocall.solve(&autocall);
+  initialize_blackscholes2d(&bestofcall);
+  bestofcall.apply_cashflow = apply_custom_cashflow;
+  results2d bestofcallresult = bestofcall.solve(&bestofcall);
 int j;
-for(j=1;j<autocall.nts;j++)
-{
-	for(i=1;i<200;i++)
-	{
-	    printf("%.4f\t",autocallresult.delta[i][j]);
-	}
-	printf("\n");
-}
-
-
-  //done and done - that's all!!
-/*market_instruments m;
-initialize_market_instruments(&m);
-
-m.add_instrument(&m,5000,'P',300,1,1,0.05);
-m.set_spot(&m,5000);
-
-//double aa1 = _gblackscholes('P',100,100,1,0.20,0);
-//printf("%.3f",aa1);
-printf("%.3f",m.volatility);
-*/
+for(j=0;j<100;j++)
+  //printf("%.5f\n",bestofcallresult.prices[100*100*99+j]);
+	printf("%.5f\n",bestofcallresult.prices[bestofcall.nts*200*199+100]);
 return 0;
 }
