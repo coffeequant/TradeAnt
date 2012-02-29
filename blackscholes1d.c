@@ -71,24 +71,6 @@ void _apply_cash_flows(blackscholes1d* bs,int j,results *output)
       }
 }
 
-void _init_results(results *_output,int numberofsteps,int nts)
-{
-   int i;
-   _output->prices = (double**)malloc(sizeof(double*)*(numberofsteps));
-   _output->delta = (double**)malloc(sizeof(double*)*(numberofsteps));
-   _output->gamma = (double**)malloc(sizeof(double*)*(numberofsteps));
-   _output->theta = (double**)malloc(sizeof(double*)*(numberofsteps));
-   _output->vega = (double**)malloc(sizeof(double*)*(numberofsteps));
-
-    for(i=0;i<numberofsteps;i++) {
-        _output->prices[i] = (double*)malloc(sizeof(double)*nts);
-        _output->delta[i] = (double*)malloc(sizeof(double)*nts);
-        _output->theta[i] = (double*)malloc(sizeof(double)*nts);
-        _output->gamma[i] = (double*)malloc(sizeof(double)*nts);
-        _output->vega[i] = (double*)malloc(sizeof(double)*nts);
-     }
-};
-
 
 void _hedge_instruments(blackscholes1d *bs,double s,double t,results *_output)
 {
@@ -328,10 +310,10 @@ results solvebs_implicit(blackscholes1d* bs,double increment)
 	    double intrate = 0.0;   //temp - animesh
 	    double volatility = 0.0; // temp - animesh
 	    double divrate = 0.0;
-	    double volatility_2=0.0;
+
 	gsl_vector *x = gsl_vector_alloc(bs->numberofsteps);
 
-    int b = 0,g=0,s;
+    int s;
 	double *A = (double*)malloc(sizeof(double)*bs->numberofsteps);
 	double *B = (double*)malloc(sizeof(double)*bs->numberofsteps);
 	double *C = (double*)malloc(sizeof(double)*bs->numberofsteps);
@@ -358,7 +340,7 @@ results solvebs_implicit(blackscholes1d* bs,double increment)
 
 
 		A[i] = (dt/(ds*ds))*0.5*volatility*volatility*((i+1)*ds*(i+1)*ds);
-		B[i] =  intrate*(i+1)*ds*dt/(2*ds);
+		B[i] =  (intrate-divrate)*(i+1)*ds*dt/(2*ds);
 		C[i] = intrate * dt;
 	}
 

@@ -26,8 +26,9 @@ int main()
   initialize_rates(&r);
   r.constantrate = 0.05;
   blackscholes2d bestofcall;
+  bestofcall.correlation = 0.2;
   bestofcall.expiry = 1.0;
-  bestofcall.dt = 0.01;
+  bestofcall.dt = 0.005;
   bestofcall.stepsize = 1;
   bestofcall.numberofsteps = 200;
 
@@ -36,8 +37,8 @@ int main()
   bestofcall.apply_cashflow = apply_custom_cashflow;
   results2d bestofcallresult = bestofcall.solve(&bestofcall);
 int j;
-for(j=0;j<100;j++)
+//for(j=0;j<100;j++)
   //printf("%.5f\n",bestofcallresult.prices[100*100*99+j]);
-	printf("%.5f\n",bestofcallresult.prices[bestofcall.nts*200*199+100]);
+	printf("%.5f\n",bestofcallresult.prices[(bestofcall.nts-1)*200*200+200*100+120]);
 return 0;
 }
