@@ -41,6 +41,7 @@ void _add_cash_flows(blackscholes1d *bs,cashflows1d modelbc)
 }
 void _set_vol_surface(blackscholes1d *bs,volsurface v)
 {
+
 	bs->_blackscholesvol = v;
 }
 
@@ -65,10 +66,12 @@ void _apply_cash_flows(blackscholes1d* bs,int j,results *output)
     			if(i*bs->stepsize >= bs->bc[g].barrier[b])
 				{
 						output->prices[i][j] = bs->bc[g].value[b];
+
 				}
     		}
     	}
       }
+
 }
 
 
@@ -105,12 +108,16 @@ results hedge_exotic(blackscholes1d* bs,market_instruments *m,int count)
 
 results solve_experimental(blackscholes1d* bs,double increment)
 {
+
     double dt = bs->dt;
     int i,j,k;
+
     double ds = bs->stepsize;
     int nts = bs->expiry/dt;
     int nas = bs->numberofsteps;
+    bs->nts = nts;
     results _output;
+
     _init_results(&_output,bs->numberofsteps,bs->nts);
     double *Au = (double*)malloc(sizeof(double)*nas);
     double *Bu = (double*)malloc(sizeof(double)*nas);
@@ -118,25 +125,28 @@ results solve_experimental(blackscholes1d* bs,double increment)
     double *Eu = (double*)malloc(sizeof(double)*nas);
     double *Fu = (double*)malloc(sizeof(double)*nas);
     double volatility,intrate,divrate;
+
     for(j=0;j<nts;j++)
     {
 
-    //printf("%.2f",_output.prices[130][0]);
         if(j%2==0)
         {
             //upstream
             for(i=0;i<nas;i++)
             {
+
                 intrate = bs->_interestrates.get_rate_with_reftime(&(bs->_interestrates),((nts-j)*dt));
+
                 divrate = bs->_dividendrates.get_rate_with_reftime(&(bs->_dividendrates),((nts-j)*dt));
+
                 volatility = bs->_blackscholesvol.get_vol_with_reftime(&(bs->_blackscholesvol),((nts-j)*dt),(i*ds))+increment;
+                //printf("%.2f\t",volatility);
 
                 Au[i] = 1 - intrate*(i*ds)*dt/ds+0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
                 Bu[i] = 0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
                 Eu[i] = -intrate*i*ds*dt/ds;
                 Fu[i] = 0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
                 Du[i] = 1 - intrate*dt;
-
                 if(i!=0 && i!=(nas-1) && j>0)
                 {
                     _output.prices[i][j] = (Bu[i]*_output.prices[i-1][j]+_output.prices[i][j-1]*Du[i]+_output.prices[i-1][j-1]*Eu[i]+(_output.prices[i+1][j-1]-_output.prices[i][j-1])*Fu[i])/Au[i];
@@ -152,14 +162,14 @@ results solve_experimental(blackscholes1d* bs,double increment)
                     _output.prices[i][j]=2*_output.prices[i-1][j] - _output.prices[i-2][j];
                 }
                  //apply boundary conditions...
+
                 _apply_cash_flows(bs,j,&_output);
-                //printf("%.2f\n",_output.prices[i][j]);
 
                 if((bs->hedge_instruments) != NULL)
                     _hedge_instruments(bs,i*ds,j*dt,&_output);
 
                 if((bs->apply_cashflow) != NULL)
-                    _output.prices[i][j] += bs->apply_cashflow(i*ds,j*dt,&_output);
+                    _output.prices[i][j] += bs->apply_cashflow(i*ds,j*dt);
 
             }
 
@@ -186,10 +196,21 @@ results solve_experimental(blackscholes1d* bs,double increment)
                 if(i==0 && j>0)
                     _output.prices[i][j]=_output.prices[i][j-1]*(1-intrate*dt);
 
+
+                _apply_cash_flows(bs,j,&_output);
+
+                if((bs->hedge_instruments) != NULL)
+                    _hedge_instruments(bs,i*ds,j*dt,&_output);
+
+                if((bs->apply_cashflow) != NULL)
+                    _output.prices[i][j] += bs->apply_cashflow(i*ds,j*dt);
+
+
             }
         }
 
      }
+
 
 return _output;
 }
@@ -227,8 +248,8 @@ results solvebs_explicit(blackscholes1d* bs)
 		//need to put a flag variable here
 	   if((bs->apply_cashflow) != NULL)
 	  {
-	  	  _output.prices[i][j] += bs->apply_cashflow(i*ds,j*dt,&_output);
-	         _output_2.prices[i][j] += bs->apply_cashflow(i*ds,j*dt,&_output);
+	  	  _output.prices[i][j] += bs->apply_cashflow(i*ds,j*dt);
+	         _output_2.prices[i][j] += bs->apply_cashflow(i*ds,j*dt);
 	 }
 	    intrate = bs->_interestrates.get_rate_with_reftime(&(bs->_interestrates),((nts-j)*dt));
 	    divrate = bs->_dividendrates.get_rate_with_reftime(&(bs->_dividendrates),((nts-j)*dt));
@@ -269,8 +290,11 @@ return _output;
 //Implcit schemes will always be preferred for 1D
 results solvebs(blackscholes1d* bs)
 {
+
 	double inc = 0.0;
 	results _output = solve_experimental(bs,inc);
+
+
 	results _output_2 = solve_experimental(bs,inc+0.01);
 
 	int i,j;
@@ -281,7 +305,7 @@ results solvebs(blackscholes1d* bs)
 			_output.vega[i][j] = _output.prices[i][j] - _output_2.prices[i][j];
 			if(i > 1)
 			{
-				_output.delta[i][j] = _output.prices[i+1][j]-_output.prices[i-1][j]/(2*bs->stepsize);
+				_output.delta[i][j] = (_output.prices[i+1][j]-_output.prices[i-1][j])/(2*bs->stepsize);
 				_output.gamma[i][j] = (_output.prices[i+1][j] + _output.prices[i-1][j] - 2*_output.prices[i][j])/(bs->stepsize*bs->stepsize);
 			}
 			if(j > 1)
@@ -331,7 +355,7 @@ results solvebs_implicit(blackscholes1d* bs,double increment)
 
 	  if((bs->apply_cashflow) != NULL)
 		  {
-		  	  _output.prices[i][j] += bs->apply_cashflow(i*ds,j*dt,&_output);
+		  	  _output.prices[i][j] += bs->apply_cashflow(i*ds,j*dt);
 		  }
 
 	    intrate = bs->_interestrates.get_rate_with_reftime(&(bs->_interestrates),((nts-j)*dt));

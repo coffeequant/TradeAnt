@@ -21,7 +21,7 @@ typedef struct vol_surface
   double* maturities;
   qdate* absolute_maturities;
   double** volatility;
-
+  double scale;
   double constantvolatility;
   //function pointers
   void (*fetch_volatility_surface)(struct vol_surface*,char*);

@@ -39,6 +39,9 @@ void _initdate(qdate *q,int Year,months m,int day)
     q->str_time.tm_sec = 0;
     q->str_time.tm_isdst = 0;
 
+    extern struct tm _globalref;
+    q->ref_time = _globalref;
+
     time_t t1 = mktime(&(q->str_time));
     time_t t2 = mktime(&(q->ref_time));
     q->difference = difftime(t1,t2)/(86400*365);
@@ -62,6 +65,9 @@ void _initstringdate(qdate *q,char *a)
     q->str_time.tm_min = 0;
     q->str_time.tm_sec = 0;
     q->str_time.tm_isdst = 0;
+
+    extern struct tm _globalref;
+    q->ref_time = _globalref;
 
     time_t t1 = mktime(&(q->str_time));
     time_t t2 = mktime(&(q->ref_time));

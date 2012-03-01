@@ -1,44 +1,66 @@
 #include <stdio.h>
-#include <tradeant/blackscholes2d.h>
+#include <tradeant/blackscholes1d.h>
 
-double apply_custom_cashflow(double spot[],double time)
+double custom_cashflow(double spot,double time)
 {
-    double m = (spot[0]>spot[1])?spot[0]:spot[1];
-    //printf("%.2f\n",((m>100)?(m-100):0.0));
-    if(time == 0.0)
-    {
-        //exit(0);
-        return ((m>100)?(m-100):0.0);
-    }
-
-
-    return 0.0;
+    double a;
+    if(spot < 80) a = 80 - spot; else a = 0;
+    //return 1;
+    if(time==0.0) return -1*a;
 }
-
 int main()
 {
-//can be today or any other date - format is year,month,day
+  //can be today or any other date - format is year,month,day
   setreftime(2012,Jan,1);
   volsurface v;
   initialize_volsurface(&v);
-  v.constantvolatility = 0.20;
+  //v.constantvolatility=0.20;
+
+  v.scale = 0.01;
+  v.set_size(&v,21,14);
+  v.fetch_volatility_surface(&v,"volsurface.csv");
+  int i=0;
+
   rates r;
   initialize_rates(&r);
   r.constantrate = 0.05;
-  blackscholes2d bestofcall;
-  bestofcall.correlation = 0.2;
-  bestofcall.expiry = 1.0;
-  bestofcall.dt = 0.005;
-  bestofcall.stepsize = 1;
-  bestofcall.numberofsteps = 200;
 
+  rates divs;
+  initialize_rates(&divs);
+  divs.constantrate = 0.001;
 
-  initialize_blackscholes2d(&bestofcall);
-  bestofcall.apply_cashflow = apply_custom_cashflow;
-  results2d bestofcallresult = bestofcall.solve(&bestofcall);
-int j;
-//for(j=0;j<100;j++)
-  //printf("%.5f\n",bestofcallresult.prices[100*100*99+j]);
-	printf("%.5f\n",bestofcallresult.prices[(bestofcall.nts-1)*200*200+200*100+120]);
+  blackscholes1d autocall;
+  initialize_blackscholes1d(&autocall);
+  autocall.stepsize = 1;
+  autocall.numberofsteps = 200;
+  autocall.expiry = 3.0;
+  autocall.dt = 0.03;
+  //v.constantvolatility = 0.20;
+  autocall.set_vol_surface(&autocall,v);
+
+  autocall.set_rates(&autocall,r,divs);
+
+ cashflows1d bcs;
+ initialize_cashflows1d(&bcs,6);
+
+  for(i=0;i<6;i++)
+
+    {
+
+      bcs.time[i] = 3.0-(i) *0.25;
+
+      bcs.value[i] = 30 + (6-i)*5;
+
+      bcs.barrier[i] = 120;
+
+    }
+
+autocall.add_cash_flows(&autocall,bcs);
+autocall.apply_cashflow = custom_cashflow;
+
+results autocallresult = autocall.solve(&autocall);
+printf("\n%.5f\n",autocallresult.prices[100][autocall.nts-10]);
+//printf("DDD");
+
 return 0;
 }

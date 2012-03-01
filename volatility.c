@@ -8,8 +8,9 @@
 */
 #include <stdio.h>
 #include <string.h>
-#include <gsl/gsl_spline.h>
+#include <gsl/gsl_interp.h>
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_spline.h>
 
 #include <tradeant/volatility.h>
 
@@ -31,8 +32,8 @@ void initialize_volsurface(volsurface* v)
   v->bump_bucket_with_reftime = _bump_bucket_with_reftime;
   v->bump_surface = _bump_surface;
   v->set_volatility_surface = _set_volatility_surface;
+  v->constantvolatility = 0.0;
 }
-
 
 
 double interpolate(double *y,double *x,double xi,int arraysize)
@@ -43,8 +44,10 @@ double interpolate(double *y,double *x,double xi,int arraysize)
   double interpval =  gsl_spline_eval(spline,xi,acc);
   gsl_spline_free(spline);
   gsl_interp_accel_free(acc);
+  if(interpval > 0.70) exit(0);
   return interpval;
 }
+
   void _set_volatility_surface(volsurface* v,double* ustrikes,double* umaturities,double** uvolatility)
   {
     int i,j;
@@ -98,7 +101,7 @@ void _fetch_volatility_surface(volsurface *csvvol,char* filename)
         exit(1);
       	}
       int i=0,j=0,k=0;
-     while(i<csvvol->matcount-1)
+     while(i<=csvvol->matcount)
 	 {
 	  fgets(newline,LINELENGTH,fp);
 	  //split strikes it into comma separated values
@@ -116,27 +119,38 @@ void _fetch_volatility_surface(volsurface *csvvol,char* filename)
 	      	char *date;
 		date=strtok(newline,SEPARATOR);
 	      for(k=0;k<csvvol->strikecount;k++) {
-		csvvol->volatility[i][k] = atof(strtok(NULL,SEPARATOR));
+		csvvol->volatility[i-1][k] = atof(strtok(NULL,SEPARATOR))*csvvol->scale;
 		}
-        csvvol->absolute_maturities[j++].initstringdate(&csvvol->absolute_maturities[j],date);
-		csvvol->maturities[j-1] = csvvol->absolute_maturities[j-1].difference;
-
+        csvvol->absolute_maturities[j].initstringdate(&csvvol->absolute_maturities[j],date);
+		csvvol->maturities[j] = csvvol->absolute_maturities[j].difference;
+		//printf("%.2f",csvvol->volatility[0]);
+        j++;
 	  }
 	  //vol surface loaded
 	  i++;
 	}
-
+//printf("%d",i);exit(0);
     }
+
 }
 
 double _get_vol_with_reftime(volsurface* csvvol,double difference,double strike)
 {
+
     if(csvvol->constantvolatility != 0)
         return csvvol->constantvolatility;
     //interpolation
+    if(difference < csvvol->maturities[0])
+		difference = csvvol->maturities[0];
+
+if(difference > csvvol->maturities[csvvol->matcount-1])
+		difference = csvvol->maturities[csvvol->matcount-1];
+//printf("%.2f",difference);exit(0);
+
     int i=0;
     for(;i<csvvol->matcount;i++)
       if(csvvol->absolute_maturities[i].difference >= difference) goto exitLoop;
+
   exitLoop:
     i = i - 1;i = i +1;
 
@@ -144,6 +158,12 @@ double _get_vol_with_reftime(volsurface* csvvol,double difference,double strike)
     double *v2array = (double*)malloc(sizeof(double)*(csvvol->strikecount));
     int date1 = i;
     int date2 = i+1;
+
+    if(date2 > (csvvol->matcount-1))
+    {
+        date1 = date1 - 1;
+        date2 = date2 - 1;
+    }
 //	printf("%f %d",csvvol->strikes[0],date1);exit(0);
 
     for(i=0;i<csvvol->strikecount;i++) {
@@ -162,7 +182,9 @@ if(strike > csvvol->strikes[csvvol->strikecount-1])
     double t2 = csvvol->maturities[date2];
 	if(t1 == difference) return v1;
 	if(t2 == difference) return v2;
-      double rv = (v1*(difference-t1) + v2*(t2-difference))/(t2-t1);
+      double rv;
+      if(t2>t1) rv = (v1*(difference-t1) + v2*(t2-difference))/(t2-t1);
+      else rv = (v2*(difference-t2) + v1*(t1-difference))/(t1-t2);
     return rv;
 }
 

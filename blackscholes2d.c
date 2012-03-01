@@ -141,6 +141,7 @@ return _output;
 
 results2d _solvebs2d(blackscholes2d* bs)
 {
+    int i,j,k;
     double inc = 0.0;
 	results2d _output = solve_experimental2d(bs,inc);
 	results2d _output_2 = solve_experimental2d(bs,inc+0.01);
