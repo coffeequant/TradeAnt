@@ -33,6 +33,7 @@ void initialize_blackscholes1d(blackscholes1d *bs)
 	  bs->hedge_instruments = _hedge_instruments;
 	  bs->apply_cashflow = NULL;
 	  bs->nts = (int)(bs->expiry / bs->dt);
+	  bs->set_model_parameters = _set_model_parameters;
 }
 
 void _add_cash_flows(blackscholes1d *bs,cashflows1d modelbc)
@@ -51,6 +52,14 @@ void _set_rates(blackscholes1d* bs,rates interestrates, rates dividends)
 	bs->_dividendrates = dividends;
 }
 
+void _set_model_parameters(struct _blackscholes1d* bs,double timeslice,double expiry,double stepsize,int numberofspotsteps)
+{
+    bs->dt = timeslice;
+    bs->expiry = expiry;
+    bs->stepsize = stepsize;
+    bs->numberofsteps = numberofspotsteps;
+}
+
 void _apply_cash_flows(blackscholes1d* bs,int j,results *output)
 {
      int g,b,i;
@@ -66,7 +75,6 @@ void _apply_cash_flows(blackscholes1d* bs,int j,results *output)
     			if(i*bs->stepsize >= bs->bc[g].barrier[b])
 				{
 						output->prices[i][j] = bs->bc[g].value[b];
-
 				}
     		}
     	}
@@ -169,7 +177,11 @@ results solve_experimental(blackscholes1d* bs,double increment)
                     _hedge_instruments(bs,i*ds,j*dt,&_output);
 
                 if((bs->apply_cashflow) != NULL)
+                {
                     _output.prices[i][j] += bs->apply_cashflow(i*ds,j*dt);
+                //    printf("DDDE");
+                }
+
 
             }
 

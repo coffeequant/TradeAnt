@@ -33,6 +33,14 @@ void initialize_rates(rates* r)
 	r->set_rates_with_date = _set_rates_with_date;
 	r->set_rates_with_reftime = _set_rates_with_reftime;
 	r->set_size = _set_rates_size;
+    r->set_constant_rate = _set_constant_rate;
+	r->isconst = 'n';
+}
+
+void _set_constant_rate(rates *r,double rate)
+{
+    r->isconst='y';
+    r->constantrate = rate;
 }
 
 void _set_rates_size(rates* r,int c)
@@ -87,8 +95,9 @@ void _fetch_rates(rates* r,char* filename)
 }
 double _get_rate_with_date(rates* r,qdate date)
 {
-    if(r->constantrate != 0)
+    if(r->isconst == 'y')
         return r->constantrate;
+
 	    int i=0;
 	    double *v1array = (double*)malloc(sizeof(double)*(r->matcount));
             double *v2array = (double*)malloc(sizeof(double)*(r->matcount));
@@ -103,9 +112,10 @@ double _get_rate_with_date(rates* r,qdate date)
 }
 double _get_rate_with_reftime(rates* r,double difference)
 {
-    if(r->constantrate != 0)
+    if(r->isconst == 'y')
         return r->constantrate;
-	int i=0;
+
+    int i=0;
 	double *v1array = (double*)malloc(sizeof(double)*(r->matcount));
         double *v2array = (double*)malloc(sizeof(double)*(r->matcount));
 	for(i=0;i<r->matcount;i++)

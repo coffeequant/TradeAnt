@@ -22,9 +22,11 @@ typedef struct interestcurve
   qdate* absolute_maturities;
   int matcount;
   double constantrate;
+  char isconst;
 
   void (*set_size)(struct interestcurve*,int);
   void (*fetch_rates)(struct interestcurve*,char*);
+  void (*set_constant_rate)(struct interestcurve*,double);
   double (*get_rate_with_date)(struct interestcurve*,qdate);
   double (*get_rate_with_reftime)(struct interestcurve*,double);
   void (*bump_rates_with_reftime)(struct interestcurve*,double,double);
@@ -40,7 +42,7 @@ void _set_rates_with_date(rates*,qdate*,double*);
 void _fetch_rates(rates*,char*);
 double _get_rate_with_date(rates*,qdate);
 double _get_rate_with_reftime(rates*,double);
-
+void _set_constant_rate(struct interestcurve*,double);
 void initialize_rates(rates*);
 void _bump_rates_with_reftime(rates*,double,double);
 void _bump_rates_with_date(rates*,qdate,double);
