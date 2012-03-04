@@ -39,6 +39,7 @@ double interpolate(double *x,double *y,double xi);
     int nts;
     //can't be more than 100
     results2d (*solve)(struct _blackscholes2d* bs);
+    void (*set_model_parameters)(struct _blackscholes2d*,double timeslice,double expiry,double stepsize,int numberofspotsteps);
     void (*set_vol_surface)(struct _blackscholes2d *bs,volsurface v[]);
     void (*set_rates)(struct _blackscholes2d* bs,rates interestrate,rates dividend[]);
     double (*apply_cashflow)(double spot[],double time);
@@ -48,6 +49,7 @@ void initialize_blackscholes2d(blackscholes2d*);
 void _set_vol_surface2d(blackscholes2d*,volsurface[]);
 void _set_rates2d(blackscholes2d*,rates,rates[]);
 results2d _solvebs2d(blackscholes2d* bs);
-void _hedge_instruments(blackscholes2d*,double,double,results2d*);
+void _hedge_instruments2d(blackscholes2d*,double,double,results2d*);
+void _set_model_parameters_2d(struct _blackscholes2d*,double timeslice,double expiry,double stepsize,int numberofspotsteps);
 
 

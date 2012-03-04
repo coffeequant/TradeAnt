@@ -28,6 +28,13 @@ void _set_rates2d(blackscholes2d* bs,rates interestrates, rates dividends[])
 	bs->_dividendrates[1] = dividends[1];
 }
 
+void _set_model_parameters_2d(struct _blackscholes2d* bs,double timeslice,double expiry,double stepsize,int numberofspotsteps)
+{
+    bs->dt = timeslice;
+    bs->expiry = expiry;
+    bs->stepsize = stepsize;
+    bs->numberofsteps = numberofspotsteps;
+}
 
 void initialize_blackscholes2d(blackscholes2d *bs)
 {
@@ -35,7 +42,7 @@ void initialize_blackscholes2d(blackscholes2d *bs)
 	  bs->set_vol_surface = _set_vol_surface2d;
 	  bs->set_rates = _set_rates2d;
 	  bs->apply_cashflow = NULL;
-	  bs->nts = (int)(bs->expiry / bs->dt);
+      bs->set_model_parameters = _set_model_parameters2d;
 }
 
 void _set_vol_surface2d(blackscholes2d *bs,volsurface v[])
@@ -43,8 +50,6 @@ void _set_vol_surface2d(blackscholes2d *bs,volsurface v[])
 	bs->_blackscholesvol[0] = v[0];
 	bs->_blackscholesvol[1] = v[1];
 }
-
-
 
 
 results2d solve_experimental2d(blackscholes2d* bs,double increment)
@@ -145,6 +150,7 @@ results2d _solvebs2d(blackscholes2d* bs)
     double inc = 0.0;
 	results2d _output = solve_experimental2d(bs,inc);
 	results2d _output_2 = solve_experimental2d(bs,inc+0.01);
+    bs->nts = (int)(bs->expiry / bs->dt);
 	int nas = bs->numberofsteps;
 	int nts = bs->nts;
     for(k=0;k<bs->nts;k++)

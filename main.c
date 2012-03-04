@@ -149,7 +149,7 @@ j=autocall.nts-1;
 {
   for(i=100;i<130;i++)
   {
-        printf("Spot %d Price -- %.2f \n",i,autocalloutput.delta[i][j]);
+        printf("Spot %d Delta -- %.2f \n",i,autocalloutput.delta[i][j]);
   }
         printf("\n");
 }
@@ -159,7 +159,7 @@ j=autocall.nts-1;
 {
   for(i=100;i<130;i++)
   {
-        printf("Spot %d Price -- %.2f \n",i,autocalloutput.gamma[i][j]);
+        printf("Spot %d Gamma -- %.2f \n",i,autocalloutput.gamma[i][j]);
   }
         printf("\n");
 }
