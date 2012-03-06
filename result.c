@@ -13,39 +13,39 @@ void _init_results2d(results2d* _output,int numberofsteps,int nts)
         _output->j = numberofsteps;
         _output->k = nts;
 
-        _output->get_prices=_get_prices;
-        _output->get_delta=_get_delta;
-        _output->get_theta=_get_theta;
-        _output->get_vega=_get_vega;
-        _output->get_gamma=_get_gamma;
+        _output->get_prices=_get_prices2d;
+        _output->get_delta=_get_delta2d;
+        _output->get_theta=_get_theta2d;
+        _output->get_vega=_get_vega2d;
+        _output->get_gamma=_get_gamma2d;
 }
 
-double _get_prices(struct _results2d* rs,int i,int j,int k)
+double _get_prices2d(struct _results2d* rs,int i,int j,int k)
 {
-    return _get_array(1,rs,i,j,k);
+    return _get_array2d(1,rs,i,j,k);
 }
 
-double _get_delta(struct _results2d* rs,int i,int j,int k)
+double _get_delta2d(struct _results2d* rs,int i,int j,int k)
 {
-    return _get_array(2,rs,i,j,k);
+    return _get_array2d(2,rs,i,j,k);
 }
 
-double _get_gamma(struct _results2d* rs,int i,int j,int k)
+double _get_gamma2d(struct _results2d* rs,int i,int j,int k)
 {
-    return _get_array(3,rs,i,j,k);
+    return _get_array2d(3,rs,i,j,k);
 }
 
-double _get_theta(struct _results2d* rs,int i,int j,int k)
+double _get_theta2d(struct _results2d* rs,int i,int j,int k)
 {
-    return _get_array(4,rs,i,j,k);
+    return _get_array2d(4,rs,i,j,k);
 }
 
-double _get_vega(struct _results2d* rs,int i,int j,int k)
+double _get_vega2d(struct _results2d* rs,int i,int j,int k)
 {
-    return _get_array(5,rs,i,j,k);
+    return _get_array2d(5,rs,i,j,k);
 }
 
-double _get_array(int con,struct _results2d* rs,int i,int j,int k)
+double _get_array2d(int con,struct _results2d* rs,int i,int j,int k)
 {
     if(con == 1)
         return rs->prices[k*rs->i*rs->j+j*rs->j+i];

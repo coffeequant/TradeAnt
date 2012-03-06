@@ -44,7 +44,6 @@ double interpolate(double *y,double *x,double xi,int arraysize)
   double interpval =  gsl_spline_eval(spline,xi,acc);
   gsl_spline_free(spline);
   gsl_interp_accel_free(acc);
-  if(interpval > 0.70) exit(0);
   return interpval;
 }
 
@@ -129,8 +128,7 @@ void _fetch_volatility_surface(volsurface *csvvol,char* filename)
 	  //vol surface loaded
 	  i++;
 	}
-//printf("%d",i);exit(0);
-    }
+  }
 
 }
 
