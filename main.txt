@@ -10,32 +10,20 @@
 
 
 #include <stdio.h>
-#include <tradeant/blackscholes1d.h>
+#include <tradeant/blackscholes2d.h>
 
 
-//sample templates
-double downinput(double spot,double timeremaining)
-{
-    double payoff = 0.0;
-    if(spot <= 60 && timeremaining == 0.0) payoff = -1*(100 - spot);
-    return payoff;
-}
-double digital_cashflow(double spot,double timeremaining)
+double bestofcall_cashflow(double spot[],double time)
 {
     double a;
-    if(spot < 90 && timeremaining == 0.0) return 13;
-    else return 0.0;
-}
+    if(spot[0] > spot[1] && time == 0.0)
+        if(spot[0] > 100) return (spot[0]-100.0);
 
-double digital2_cashflow(double spot,double timeremaining)
-{
-    //return 1;
-    double a;
-    if(spot >= 100.0 && timeremaining == 0.0)
-        return 13;
-    else return 0.0;
-}
+    if(spot[1] > spot[0] && time == 0.0)
+        if(spot[1] > 100) return (spot[1]-100.0);
 
+    return 0.0;
+}
 
 int main()
 {
@@ -43,126 +31,38 @@ int main()
   setreftime(2012,Jan,1);
 
   //Volatility Surface
-  volsurface v;
-  initialize_volsurface(&v);
-
-  v.scale = 0.01;
-  v.set_size(&v,21,14);
-  v.constantvolatility = 0.21;
-  v.fetch_volatility_surface(&v,"volsurface.csv");
-
-
-  //Interest Rate Curve
+  volsurface v[2];
   rates r;
   initialize_rates(&r);
-  r.set_constant_rate(&r,0.0);
+  r.set_constant_rate(&r,0.05);
 
-  //Dividend Curve
-  rates divs;
-  initialize_rates(&divs);
-  divs.set_constant_rate(&divs,0.0);
-
-  blackscholes1d digital;
-  initialize_blackscholes1d(&digital);
-
-  digital.set_model_parameters(&digital,0.005,1.25,1,200);
-  digital.set_vol_surface(&digital,v);
-  digital.set_rates(&digital,r,divs);
+ //Dividend Curve
+  rates divs[2];
 
 
-  digital.apply_cashflow = digital_cashflow;
-  results digitalcalloutput = digital.solve(&digital);
-
-  digital.apply_cashflow = digital2_cashflow;
-  results digitalputoutput = digital.solve(&digital);
-
-
-int i=0,j=0;
-
-printf("\n*************Digital Call Prices***********\n");
-j=digital.nts-1;
-{
-  for(i=0;i<digital.numberofsteps;i++)
+  int i=0;
+  for(;i<2;i++)
   {
-        printf("%.2f\t",digitalcalloutput.prices[i][j]);
+        initialize_volsurface(&v[i]);
+        v[i].scale = 0.01;
+        v[i].set_size(&v[i],21,14);
+        v[i].constantvolatility = 0.20;
+        //v[i].fetch_volatility_surface(&v[i],"volsurface.csv");
+
+        initialize_rates(&divs[i]);
+        divs[i].set_constant_rate(&divs[i],0.001);
   }
-        printf("\n");
-}
-j=0;
-printf("\n*************Digital Call Deltas***********\n");
-j=digital.nts-1;
-{
-  for(i=0;i<digital.numberofsteps;i++)
-  {
-        printf("%.2f\t",digitalcalloutput.delta[i][j]);
-  }
-        printf("\n");
-}
-j=0;
-printf("\n*************Digital Call Gammas***********\n");
-j=digital.nts-1;
-{
-  for(i=0;i<digital.numberofsteps;i++)
-  {
-        printf("%.2f\t",digitalcalloutput.gamma[i][j]);
-  }
-        printf("\n");
-}
 
-//let's move on to something more exotic
-//an autocall which pays 20% annualized coupon
-//if a barrier is hit on specific times
-//if none of the barriers are hit but at expiry index is below 60% the buyer loses 100 - x% (where x is below 60)
+  blackscholes2d bestofcall;
+  initialize_blackscholes2d(&bestofcall);
 
-blackscholes1d autocall;
-initialize_blackscholes1d(&autocall);
-autocall.set_model_parameters(&autocall,0.01,3.0,1,200);
-autocall.set_vol_surface(&autocall,v);
-autocall.set_rates(&autocall,r,divs);
+  bestofcall.set_model_parameters(&bestofcall,0.01,1.0,1.0,200,0.0);
+  bestofcall.set_vol_surface(&bestofcall,v);
+  bestofcall.set_rates(&bestofcall,r,divs);
 
-cashflows1d coupons;
-initialize_cashflows1d(&coupons,6);
- for(i=0;i<6;i++)
-    {
-      coupons.time[i] = 3.0-(i) *0.25;
-      coupons.value[i] = 30 + (6-i)*5;
-      coupons.barrier[i] = 120;
-    }
-
-autocall.add_cash_flows(&autocall,coupons);
-
-autocall.apply_cashflow = downinput;
-results autocalloutput = autocall.solve(&autocall);
-
-printf("\n*************Autocallable Prices***********\n");
-j=autocall.nts-1;
-{
-  for(i=100;i<130;i++)
-  {
-        printf("Spot %d Price -- %.2f \n",i,autocalloutput.prices[i][j]);
-  }
-        printf("\n");
-}
-
-printf("\n*************Autocallable Deltas***********\n");
-j=autocall.nts-1;
-{
-  for(i=100;i<130;i++)
-  {
-        printf("Spot %d Delta -- %.2f \n",i,autocalloutput.delta[i][j]);
-  }
-        printf("\n");
-}
-
-printf("\n*************Autocallable Gammas***********\n");
-j=autocall.nts-1;
-{
-  for(i=100;i<130;i++)
-  {
-        printf("Spot %d Gamma -- %.2f \n",i,autocalloutput.gamma[i][j]);
-  }
-        printf("\n");
-}
-
+  bestofcall.apply_cashflow = bestofcall_cashflow;
+  results2d bestofcalloutput = bestofcall.solve(&bestofcall);
+  for(i=1;i<bestofcall.numberofsteps;i++)
+        printf("Price:%.3f\t",bestofcalloutput.get_prices(&bestofcalloutput,10,i,bestofcall.nts-1));
 return 0;
 }

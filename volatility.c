@@ -134,7 +134,6 @@ void _fetch_volatility_surface(volsurface *csvvol,char* filename)
 
 double _get_vol_with_reftime(volsurface* csvvol,double difference,double strike)
 {
-
     if(csvvol->constantvolatility != 0)
         return csvvol->constantvolatility;
     //interpolation

@@ -24,12 +24,12 @@ double interpolate(double *x,double *y,double xi);
 typedef struct _explicitparams
 {
 	int dimension;
-	double *Au; 
+	double *Au;
     double **Bu;
     double *Du;
     double **Eu;
     double **Fu;
-	
+
 }explicitparams;
 
 
@@ -42,7 +42,7 @@ typedef struct _explicitparams
     rates _dividendrates[2];
     double correlation;
     //interestcurve blackscholesintcurve;
-    
+
 	explicitparams _eps;
     market_instruments* _m[3];
     int _mi_count;
@@ -52,7 +52,7 @@ typedef struct _explicitparams
     int nts;
     //can't be more than 100
     results2d (*solve)(struct _blackscholes2d* bs);
-     void (*set_model_parameters)(struct _blackscholes2d*,double timeslice,double expiry,double stepsize,int numberofspotsteps);
+     void (*set_model_parameters)(struct _blackscholes2d*,double timeslice,double expiry,double stepsize,int numberofspotsteps,double correlation);
    void (*set_vol_surface)(struct _blackscholes2d *bs,volsurface v[]);
     void (*set_rates)(struct _blackscholes2d* bs,rates interestrate,rates dividend[]);
     double (*apply_cashflow)(double spot[],double time);
@@ -65,6 +65,6 @@ void _set_vol_surface2d(blackscholes2d*,volsurface[]);
 void _set_rates2d(blackscholes2d*,rates,rates[]);
 results2d _solvebs2d(blackscholes2d* bs);
 void _hedge_instruments2d(blackscholes2d*,double,double,results2d*);
-void _set_model_parameters2d(struct _blackscholes2d*,double timeslice,double expiry,double stepsize,int numberofspotsteps);
+void _set_model_parameters2d(struct _blackscholes2d*,double timeslice,double expiry,double stepsize,int numberofspotsteps,double correlation);
 
 

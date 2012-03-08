@@ -46,12 +46,13 @@ void _initialize_explicitparams(blackscholes2d* bs)
 	}
 }
 
-void _set_model_parameters2d(struct _blackscholes2d* bs,double timeslice,double expiry,double stepsize,int numberofspotsteps)
+void _set_model_parameters2d(struct _blackscholes2d* bs,double timeslice,double expiry,double stepsize,int numberofspotsteps,double correlation)
 {
     bs->dt = timeslice;
     bs->expiry = expiry;
     bs->stepsize = stepsize;
     bs->numberofsteps = numberofspotsteps;
+    bs->correlation = correlation;
 	_initialize_explicitparams(bs);
 }
 
@@ -72,21 +73,20 @@ void _set_vol_surface2d(blackscholes2d *bs,volsurface v[])
 		bs->_blackscholesvol[p] = v[p];
 }
 
-void calc_timestep(blackscholes2d *bs,results2d *_output,int i,int j,int k,double *volatility,double *divrate)
+void calc_timestep(blackscholes2d *bs,results2d *_output,int i,int j,int k,double *volatility)
 {
 	int nas = bs->numberofsteps;
     double dt = bs->dt;
     double ds = bs->stepsize;
 
-	_output->prices[k*nas*nas+nas*j+i] = bs->_eps.Bu[i][0]*_output->prices[k*nas*nas+nas*j+i-1] 	\
-	+ bs->_eps.Bu[j][1]*_output->prices[k*nas*nas+nas*(j-1)+i]
-	+ _output->prices[(k-1)*nas*nas+nas*j+i]*bs->_eps.Du[i] \
-	+ _output->prices[(k-1)*nas*nas+nas*(j)+(i-1)]*bs->_eps.Eu[i][0] \
-	+ _output->prices[(k-1)*nas*nas+nas*(j-1)+(i)]*bs->_eps.Eu[i][1] \
-	+ (_output->prices[(k-1)*nas*nas+nas*(j)+i+1]-_output->prices[(k-1)*nas*nas+nas*(j)+i])*bs->_eps.Fu[i][0] \
-	+ (_output->prices[(k-1)*nas*nas+nas*(j+1)+i]-_output->prices[(k-1)*nas*nas+nas*(j)+i])*bs->_eps.Fu[i][1] \
-	- (dt*i*j/(4))*(_output->prices[(k-1)*nas*nas+(j+1)*nas+i+1]-_output->prices[(k-1)*nas*nas+(j+1)*nas+i-1]-_output->prices[(k)*nas*nas+(j-1)*nas+i+1]+_output->prices[(k)*nas*nas+(j-1)*nas+i-1])*bs->correlation*volatility[0]*volatility[1];
-
+	_output->prices[k*nas*nas+nas*j+i] = bs->_eps.Bu[i][0]*_output->prices[k*nas*nas+nas*j+i-1];
+	_output->prices[k*nas*nas+nas*j+i]+= bs->_eps.Bu[j][1]*_output->prices[k*nas*nas+nas*(j-1)+i];
+	_output->prices[k*nas*nas+nas*j+i]+= _output->prices[(k-1)*nas*nas+nas*j+i]*bs->_eps.Du[i];
+	_output->prices[k*nas*nas+nas*j+i]+= _output->prices[(k-1)*nas*nas+nas*(j)+(i-1)]*bs->_eps.Eu[i][0];
+	_output->prices[k*nas*nas+nas*j+i]+= _output->prices[(k-1)*nas*nas+nas*(j-1)+(i)]*bs->_eps.Eu[j][1];
+	_output->prices[k*nas*nas+nas*j+i]+= (_output->prices[(k-1)*nas*nas+nas*(j)+i+1]-_output->prices[(k-1)*nas*nas+nas*(j)+i])*bs->_eps.Fu[i][0];
+	_output->prices[k*nas*nas+nas*j+i]+= (_output->prices[(k-1)*nas*nas+nas*(j+1)+i]-_output->prices[(k-1)*nas*nas+nas*(j)+i])*bs->_eps.Fu[j][1];
+	_output->prices[k*nas*nas+nas*j+i]+= (dt*i*j/(4.0))*(_output->prices[(k-1)*nas*nas+(j+1)*nas+i+1]-_output->prices[(k-1)*nas*nas+(j+1)*nas+i-1]-_output->prices[(k)*nas*nas+(j-1)*nas+i+1]+_output->prices[(k)*nas*nas+(j-1)*nas+i-1])*bs->correlation*volatility[0]*volatility[1];
 	_output->prices[k*nas*nas+nas*j+i] /= bs->_eps.Au[i];
 }
 
@@ -94,7 +94,7 @@ void calculate_params(blackscholes2d* bs,double intrate,double* volatility,doubl
 {
 	double dt = bs->dt;
     double ds = bs->stepsize;
-	if(j != -1)
+    if(j != -1)
 	{
 		bs->_eps.Bu[j][1] = 0.5*volatility[1]*volatility[1]*j*ds*j*ds*dt/(ds*ds);
 		bs->_eps.Eu[j][1] = -(intrate-divrate[1])*j*ds*dt/ds;
@@ -102,10 +102,10 @@ void calculate_params(blackscholes2d* bs,double intrate,double* volatility,doubl
 	}
 	if(i != -1)
 	{
-		bs->_eps.Au[i] = 1 - (intrate-divrate[1])*(i*ds)*dt/ds+0.5*volatility[1]*volatility[0]*i*ds*i*ds*dt/(ds*ds)-(intrate-divrate[0])*(j*ds)*dt/ds+0.5*volatility[1]*volatility[0]*j*ds*j*ds*dt/(ds*ds);
-		bs->_eps.Bu[i][0] = 0.5*volatility[1]*volatility[0]*i*ds*i*ds*dt/(ds*ds);
-		bs->_eps.Eu[i][0] = -(intrate-divrate[1])*i*ds*dt/ds;
-		bs->_eps.Fu[i][0] = 0.5*divrate[1]*divrate[0]*i*ds*i*ds*dt/(ds*ds);
+		bs->_eps.Au[i] = 1 + 0.5*volatility[1]*volatility[1]*j*ds*j*ds*dt/(ds*ds)+ 0.5*volatility[0]*volatility[0]*i*ds*i*ds*dt/(ds*ds) - intrate*(i*ds)*dt/ds  - intrate*(j*ds)*dt/ds;
+		bs->_eps.Bu[i][0] = 0.5*volatility[0]*volatility[0]*i*ds*i*ds*dt/(ds*ds);
+		bs->_eps.Eu[i][0] = -(intrate-divrate[0])*i*ds*dt/ds;
+		bs->_eps.Fu[i][0] = 0.5*volatility[0]*volatility[0]*i*ds*i*ds*dt/(ds*ds);
 		bs->_eps.Du[i] = 1 - intrate*dt;
 	}
 }
@@ -136,53 +136,48 @@ results2d solve_experimental2d(blackscholes2d* bs,double increment)
     int i,j,k;
     double ds = bs->stepsize;
     int nts = bs->expiry/dt;
+    bs->nts = nts;
     int nas = bs->numberofsteps;
     results2d _output;
-    _init_results2d(&_output,bs->numberofsteps,bs->nts);
+    _init_results2d(&_output,nas,nts);
 	double volatility[2];
 	double divrate[2];
 	double intrate;
 	double tmp[2];
+    int p = 0;
 
     for(k=0;k<nts;k++)
     {
         //upstream - downstream to code (animesh)
+        for(p=0;p<2;p++)
+				divrate[p] = bs->_dividendrates[p].get_rate_with_reftime(&(bs->_dividendrates[p]),((nts-k)*dt));
+
         for(j=0;j<nas;j++)
         {
 
-			intrate = bs->_interestrates.get_rate_with_reftime(&(bs->_interestrates),((nts-k)*dt));
-			calculate_params(bs,intrate,volatility,divrate,j,-1);
+            	volatility[0] =bs->_blackscholesvol[p].get_vol_with_reftime(&(bs->_blackscholesvol[p]),((nts-k)*dt),(i*ds))+increment;
+				volatility[1] =bs->_blackscholesvol[p].get_vol_with_reftime(&(bs->_blackscholesvol[p]),((nts-k)*dt),(j*ds))+increment;
 
-			apply_boundary_conditions2d(bs,&_output,intrate,-1,j,k);
+                intrate = bs->_interestrates.get_rate_with_reftime(&(bs->_interestrates),((nts-k)*dt));
 
-			int p;
-			for(p=0;p<2;p++)
-			{
-				divrate[p] = bs->_dividendrates[p].get_rate_with_reftime(&(bs->_dividendrates[p]),((nts-k)*dt));
-				volatility[p] = bs->_blackscholesvol[p].get_vol_with_reftime(&(bs->_blackscholesvol[p]),((nts-k)*dt),(i*ds))+increment;
-			}
 
                 for(i=0;i<nas;i++)
                 {
-					calculate_params(bs,intrate,volatility,divrate,-1,j);
-					apply_boundary_conditions2d(bs,&_output,intrate,i,j,k);
+                    apply_boundary_conditions2d(bs,&_output,intrate,i,j,k);
+                    calculate_params(bs,intrate,volatility,divrate,j,i);
 
                     if(i!=0 && i!=(nas-1) && (j!=0) && j!=(nas-1) && k>0)
                     {
-						calc_timestep(bs,&_output,i,j,k,volatility,divrate);
+						calc_timestep(bs,&_output,i,j,k,volatility);
                     }
 
-                    tmp[0] = j*ds;tmp[1] = i*ds;
+                   tmp[1] = j*ds;tmp[0] = i*ds;
 
-                    if((bs->apply_cashflow) != NULL)
-                    {
-                        _output.prices[k*nas*nas+nas*j+i] += bs->apply_cashflow(tmp,k*dt);
-                    }
-
-                }
+                   if((bs->apply_cashflow) != NULL)
+                        _output.prices[k*nas*nas+nas*j+i]+= bs->apply_cashflow(tmp,k*dt);
+               }
 
           }
-
     }
 
 return _output;
