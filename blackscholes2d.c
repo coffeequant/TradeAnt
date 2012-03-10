@@ -77,7 +77,6 @@ void calc_timestep(blackscholes2d *bs,results2d *_output,int i,int j,int k,doubl
 {
 	int nas = bs->numberofsteps;
     double dt = bs->dt;
-    double ds = bs->stepsize;
 
 	_output->prices[k*nas*nas+nas*j+i] = bs->_eps.Bu[i][0]*_output->prices[k*nas*nas+nas*j+i-1];
 	_output->prices[k*nas*nas+nas*j+i]+= bs->_eps.Bu[j][1]*_output->prices[k*nas*nas+nas*(j-1)+i];

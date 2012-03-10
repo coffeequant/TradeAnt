@@ -1,0 +1,203 @@
+/* 
+   modelparams.strings
+   GenericMonteCarloSV
+
+   Created by animesh saxena on 9/14/10.
+   Copyright 2010. All rights reserved.
+ */
+function [paraset,eps,kappa,theta,V0,rho,r,T,X0,Strike,exact_price] = setup_Heston(para_name)
+
+if strcmp(para_name,'Andersen1_100')
+    paraset = 'Andersen2008 CaseI K=100';
+    eps = 1;% volatility of variance
+    kappa = 0.5; %mean reversion speed
+    theta = 0.04; %long term variance level
+    V0 = theta;
+    rho = -0.9;
+    r = 0;
+    T = 10;
+    X0 = 100;
+    Strike = 100;
+    exact_price = 13.08467013687751;
+
+elseif strcmp(para_name,'Andersen1_140')
+    paraset = 'Andersen2008 Case1 K=140';
+    eps = 1;% volatility of variance
+    kappa = 0.5; %mean reversion speed
+    theta = 0.04; %long term variance level
+    V0 = theta;
+    rho = -0.9;
+    r = 0;
+    T = 10;
+    X0 = 100;
+    Strike = 140;
+    exact_price = 0.2957744355823389;
+
+elseif strcmp(para_name,'Andersen1_70')
+    paraset = 'Andersen2008 Case1 K=70';
+    eps = 1;% volatility of variance
+    kappa = 0.5; %mean reversion speed
+    theta = 0.04; %long term variance level
+    V0 = theta;
+    rho = -0.9;
+    r = 0;
+    T = 10;
+    X0 = 100;
+    Strike = 70;
+    exact_price = 35.84976970378283;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+elseif strcmp(para_name,'Andersen2_100')
+    paraset = 'Andersen2008 Case2 K=100';
+    eps = 0.9;% volatility of variance
+    kappa = 0.3; %mean reversion speed
+    theta = 0.04; %long term variance level
+    V0 = theta;
+    rho = -0.5;
+    r = 0;
+    T = 15;
+    X0 = 100;
+    Strike = 100;
+    exact_price = 16.64922285932261;
+
+elseif strcmp(para_name,'Andersen2_140')
+    paraset = 'Andersen2008 Case2 K=140';
+    eps = 0.9;% volatility of variance
+    kappa = 0.3; %mean reversion speed
+    theta = 0.04; %long term variance level
+    V0 = theta;
+    rho = -0.5;
+    r = 0;
+    T = 15;
+    X0 = 100;
+    Strike = 140;
+    exact_price = 5.138190404638912;
+
+elseif strcmp(para_name,'Andersen2_70')
+    paraset = 'Andersen2008 Case2 K=70';
+    eps = 0.9;% volatility of variance
+    kappa = 0.3; %mean reversion speed
+    theta = 0.04; %long term variance level
+    V0 = theta;
+    rho = -0.5;
+    r = 0;
+    T = 15;
+    X0 = 100;
+    Strike = 70;
+    exact_price = 37.16966467692678;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+elseif strcmp(para_name,'Andersen3_100')
+    %Case 3 in Anderson 2008
+    paraset = 'Andersen2008 Case3 K=100';
+    eps = 1;% volatility of variance
+    kappa = 1; %mean reversion speed
+    theta = 0.09; %long term variance level
+    V0 = theta;
+    rho = -0.3;
+    r = 0;
+    T = 5;
+    X0 = 100;
+    Strike = 100;
+    exact_price = 21.7952877424736;
+
+elseif strcmp(para_name,'Andersen3_140')
+    %Case 3 in Anderson 2008
+    paraset = 'Andersen2008 Case3 K=140';
+    eps = 1;% volatility of variance
+    kappa = 1; %mean reversion speed
+    theta = 0.09; %long term variance level
+    V0 = theta;
+    rho = -0.3;
+    r = 0;
+    T = 5;
+    X0 = 100;
+    Strike = 140;
+    exact_price = 9.983067823798479;
+
+elseif strcmp(para_name,'Andersen3_70')
+    %Case 3 in Anderson 2008
+    paraset = 'Andersen2008 Case3 K=70';
+    eps = 1;% volatility of variance
+    kappa = 1; %mean reversion speed
+    theta = 0.09; %long term variance level
+    V0 = theta;
+    rho = -0.3;
+    r = 0;
+    T = 5;
+    X0 = 100;
+    Strike = 70;
+    exact_price = 38.77204410297986;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+elseif strcmp(para_name,'Broadie1')
+    %Braoadie exact
+    paraset = 'Broadie exact case 1';
+    eps = 0.61;% volatility of variance
+    kappa = 6.21; %mean reversion speed
+    theta = 0.019; %long term variance level
+    V0 = 0.010201;
+    rho = -0.7;
+    r = 0.0319;
+    T = 1;
+    X0 = 100;
+    Strike = 100;
+    exact_price = 6.806113313462006;
+elseif strcmp(para_name,'Lord') || strcmp(para_name,'Broadie2');
+    %Lord
+    paraset = 'lord';
+    eps = 1;% volatility of variance
+    kappa = 2; %mean reversion speed
+    theta = 0.09; %long term variance level
+    V0 = theta;
+    rho = -0.3;
+    r = 0.05;
+    T = 5;
+    X0 = 100;
+    Strike = 100;
+    exact_price = 34.99975835118381;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+elseif strcmp(para_name,'Jackel')
+    paraset = 'Jackel';
+    eps = 2;% volatility of variance
+    kappa = 1; %mean reversion speed
+    theta = 0.16; %long term variance level
+    V0 = theta;
+    rho = -0.8;
+    r = 0;
+    T = 2;
+    X0 = 1;
+    Strike = 1;
+    exact_price = 0.1334444564805521;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+elseif strcmp(para_name,'Smith')
+    paraset = 'Smith';
+    eps = 0.5196;% volatility of variance
+    kappa = 1.0407; %mean reversion speed
+    theta = 0.0586; %long term variance level
+    V0 = 0.0194;
+    rho = -0.6747;
+    r = 0;
+    T = 4;
+    X0 = 100;
+    Strike = 100;
+    %exact_price = 15.1796;%literature
+    exact_price = 15.16790670022819;
+elseif strcmp(para_name,'Smith_Asian')
+    paraset = 'Smith_Asian';
+    eps = 0.5196;% volatility of variance
+    kappa = 1.0407; %mean reversion speed
+    theta = 0.0586; %long term variance level
+    V0 = 0.0194;
+    rho = -0.6747;
+    r = 0;
+    T = 4;
+    X0 = 100;
+    Strike = 100;
+    %exact_price = 15.1796;%literature
+    exact_price = 9.712;
+    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+elseif strcmp(para_name,'Glasserman')
+    %very close to Broadie1 (taken from paper by Duffie et al)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+end
