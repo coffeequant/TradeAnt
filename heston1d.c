@@ -101,7 +101,7 @@ void calculate_paramsheston1d(heston1d* hs,double intrate,double divrate,int j,i
     double ds2 = hs->volstepsize;
     double variance = j*ds2;
     double sigma = pow(variance,0.5);
-    double p = hs->meanreversion*(hs->longtermvariance-sigma*sigma);
+    double p = hs->meanreversion*(hs->longtermvariance-variance);
     double q = hs->volofvol*sigma;
 
     //generic equation dsigma = pdt + qdX1
@@ -113,10 +113,10 @@ void calculate_paramsheston1d(heston1d* hs,double intrate,double divrate,int j,i
 	}
 	if(i != -1)
 	{
-		hs->_eps.Au[i] = 1 + 0.5*(j*ds2)*(j*ds2)*(i*ds1)*(i*ds1)*dt/(ds1*ds1)+0.5*q*q*dt/(ds2*ds2)+intrate*i*ds1*dt/(ds1)+p*dt/ds2;
-		hs->_eps.Bu[i][0] = 0.5*(j*ds2)*(j*ds2)*(i*ds1)*(i*ds1)*dt/(ds1*ds1);
+		hs->_eps.Au[i] = 1 + 0.5*(j*ds2)*(i*ds1)*(i*ds1)*dt/(ds1*ds1)+0.5*q*q*dt/(ds2*ds2)+intrate*i*ds1*dt/(ds1)+p*dt/ds2;
+		hs->_eps.Bu[i][0] = 0.5*(j*ds2)*(i*ds1)*(i*ds1)*dt/(ds1*ds1);
 		hs->_eps.Eu[i][0] = -intrate*i*ds1*dt/ds1;
-		hs->_eps.Fu[i][0] = 0.5*(j*ds2)*(j*ds2)*(i*ds1)*(i*ds1)*dt/(ds1*ds1);
+		hs->_eps.Fu[i][0] = 0.5*(j*ds2)*(i*ds1)*(i*ds1)*dt/(ds1*ds1);
 		hs->_eps.Du[i] = 1 - intrate*dt;
 	}
 }
