@@ -174,6 +174,9 @@ results2d solve_experimental2d(blackscholes2d* bs,double increment)
 
                    if((bs->apply_cashflow) != NULL)
                         _output.prices[k*nas*nas+nas*j+i]+= bs->apply_cashflow(tmp,k*dt);
+
+                    if((bs->apply_coupon) != NULL)
+                      _output.prices[k*nas*nas+nas*j+i] = bs->apply_coupon(tmp,k*dt);
                }
 
           }

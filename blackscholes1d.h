@@ -45,6 +45,7 @@ double interpolate(double *x,double *y,double xi);
     void (*set_rates)(struct _blackscholes1d* bs,rates interestrate,rates dividend);
     void (*add_cash_flows)(struct _blackscholes1d*,cashflows1d bc);
     double (*apply_cashflow)(double spot,double time);
+    double (*apply_coupon)(double spot,double time);
     void (*hedge_instruments)(struct _blackscholes1d*,double,double,results*);
     void (*set_model_parameters)(struct _blackscholes1d*,double timeslice,double expiry,double stepsize,int numberofspotsteps);
   }blackscholes1d;

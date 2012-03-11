@@ -82,7 +82,6 @@ void calc_timestepheston1d(heston1d *hs,results2d *_output,int i,int j,int k)
 	double sigma = pow(variance,0.5);
     double q = hs->volofvol*sigma;
 
-
 	_output->prices[k*nas1*nas2+nas2*j+i] = hs->_eps.Bu[i][0]*_output->prices[k*nas1*nas2+nas2*j+i-1];
 	_output->prices[k*nas1*nas2+nas2*j+i]+= hs->_eps.Bu[j][1]*_output->prices[k*nas1*nas2+nas2*(j-1)+i];
 	_output->prices[k*nas1*nas2+nas2*j+i]+= _output->prices[(k-1)*nas1*nas2+nas2*j+i]*hs->_eps.Du[i];
@@ -90,7 +89,7 @@ void calc_timestepheston1d(heston1d *hs,results2d *_output,int i,int j,int k)
 	_output->prices[k*nas1*nas2+nas2*j+i]+= _output->prices[(k-1)*nas1*nas2+nas2*(j-1)+i]*hs->_eps.Eu[j][1];
 	_output->prices[k*nas1*nas2+nas2*j+i]+= (_output->prices[(k-1)*nas1*nas2+nas2*j+i+1]-_output->prices[(k-1)*nas1*nas2+nas2*j+i])*hs->_eps.Fu[i][0];
 	_output->prices[k*nas1*nas2+nas2*j+i]+= (_output->prices[(k-1)*nas1*nas2+nas2*(j+1)+i]-_output->prices[(k-1)*nas1*nas2+nas2*j+i])*hs->_eps.Fu[j][1];
-	_output->prices[k*nas1*nas2+nas2*j+i]+= (dt*hs->correlation*(i*ds1)*(j*ds2)*q/(4.0*ds1*ds2))*(_output->prices[(k-1)*nas1*nas2+nas2*(j+1)+i+1]-_output->prices[(k-1)*nas1*nas2+nas2*(j+1)+i-1]-_output->prices[(k)*nas1*nas2+nas2*(j-1)+i+1]+_output->prices[(k)*nas1*nas2+nas2*(j-1)+i-1]);
+	_output->prices[k*nas1*nas2+nas2*j+i]+= (dt*hs->correlation*(i*ds1)*q*sigma/(4.0*ds1*ds2))*(_output->prices[(k-1)*nas1*nas2+nas2*(j+1)+i+1]-_output->prices[(k-1)*nas1*nas2+nas2*(j+1)+i-1]-_output->prices[(k)*nas1*nas2+nas2*(j-1)+i+1]+_output->prices[(k)*nas1*nas2+nas2*(j-1)+i-1]);
 	_output->prices[k*nas1*nas2+nas2*j+i] /= hs->_eps.Au[i];
 }
 

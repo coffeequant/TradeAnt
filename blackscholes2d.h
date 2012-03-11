@@ -56,6 +56,7 @@ typedef struct _explicitparams
    void (*set_vol_surface)(struct _blackscholes2d *bs,volsurface v[]);
     void (*set_rates)(struct _blackscholes2d* bs,rates interestrate,rates dividend[]);
     double (*apply_cashflow)(double spot[],double time);
+    double (*apply_coupon)(double spot[],double time);
 }blackscholes2d;
 
 

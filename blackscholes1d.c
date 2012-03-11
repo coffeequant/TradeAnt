@@ -177,11 +177,9 @@ results solve_experimental(blackscholes1d* bs,double increment)
                     _hedge_instruments(bs,i*ds,j*dt,&_output);
 
                 if((bs->apply_cashflow) != NULL)
-                {
                     _output.prices[i][j] += bs->apply_cashflow(i*ds,j*dt);
-                //    printf("DDDE");
-                }
-
+                if((bs->apply_coupon) != NULL)
+                      _output.prices[i][j] = bs->apply_coupon(i*ds,j*dt);
 
             }
 
