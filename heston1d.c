@@ -78,9 +78,9 @@ void calc_timestepheston1d(heston1d *hs,results2d *_output,int i,int j,int k)
 	double dt = hs->dt;
 	double ds1 = hs->stepsize;
 	double ds2 = hs->volstepsize;
-	double variance = j*ds2;
-	double sigma = pow(variance,0.5);
-    double q = hs->volofvol*sigma;
+	//double variance = j*ds2;
+	double sigma = j*ds2;
+    double q = hs->volofvol/2;
 
 	_output->prices[k*nas1*nas2+nas2*j+i] = hs->_eps.Bu[i][0]*_output->prices[k*nas1*nas2+nas2*j+i-1];
 	_output->prices[k*nas1*nas2+nas2*j+i]+= hs->_eps.Bu[j][1]*_output->prices[k*nas1*nas2+nas2*(j-1)+i];
@@ -98,10 +98,11 @@ void calculate_paramsheston1d(heston1d* hs,double intrate,double divrate,int j,i
 	double dt = hs->dt;
     double ds1 = hs->stepsize;
     double ds2 = hs->volstepsize;
-    double variance = j*ds2;
-    double sigma = pow(variance,0.5);
-    double p = hs->meanreversion*(hs->longtermvariance-variance);
-    double q = hs->volofvol*sigma;
+    //double variance = j*ds2;
+    double sigma = j*ds2;//pow(variance,0.5);
+    //double p = hs->meanreversion*(hs->longtermvariance-variance);
+    double p = (0.5/sigma)*((hs->meanreversion)*(hs->longtermvariance-sigma*sigma)-hs->volofvol*hs->volofvol/4);
+    double q = hs->volofvol/(2);
 
     //generic equation dsigma = pdt + qdX1
     if(j != -1)
@@ -112,10 +113,10 @@ void calculate_paramsheston1d(heston1d* hs,double intrate,double divrate,int j,i
 	}
 	if(i != -1)
 	{
-		hs->_eps.Au[i] = 1 + 0.5*(j*ds2)*(i*ds1)*(i*ds1)*dt/(ds1*ds1)+0.5*q*q*dt/(ds2*ds2)+intrate*i*ds1*dt/(ds1)+p*dt/ds2;
-		hs->_eps.Bu[i][0] = 0.5*(j*ds2)*(i*ds1)*(i*ds1)*dt/(ds1*ds1);
+		hs->_eps.Au[i] = 1 + 0.5*(j*ds2)*(j*ds2)*(i*ds1)*(i*ds1)*dt/(ds1*ds1)+0.5*q*q*dt/(ds2*ds2)+intrate*i*ds1*dt/(ds1)+p*dt/ds2;
+		hs->_eps.Bu[i][0] = 0.5*(j*ds2)*(j*ds2)*(i*ds1)*(i*ds1)*dt/(ds1*ds1);
 		hs->_eps.Eu[i][0] = -intrate*i*ds1*dt/ds1;
-		hs->_eps.Fu[i][0] = 0.5*(j*ds2)*(i*ds1)*(i*ds1)*dt/(ds1*ds1);
+		hs->_eps.Fu[i][0] = 0.5*(j*ds2)*(j*ds2)*(i*ds1)*(i*ds1)*dt/(ds1*ds1);
 		hs->_eps.Du[i] = 1 - intrate*dt;
 	}
 }
