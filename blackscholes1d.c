@@ -32,6 +32,7 @@ void initialize_blackscholes1d(blackscholes1d *bs)
 	  bs->boundarycount = 0;
 	  bs->hedge_instruments = _hedge_instruments;
 	  bs->apply_cashflow = NULL;
+	  bs->apply_coupon = NULL;
 	  bs->nts = (int)(bs->expiry / bs->dt);
 	  bs->set_model_parameters = _set_model_parameters;
 }
@@ -134,6 +135,7 @@ results solve_experimental(blackscholes1d* bs,double increment)
     double *Fu = (double*)malloc(sizeof(double)*nas);
     double volatility,intrate,divrate;
 
+
     for(j=0;j<nts;j++)
     {
 
@@ -173,13 +175,16 @@ results solve_experimental(blackscholes1d* bs,double increment)
 
                 _apply_cash_flows(bs,j,&_output);
 
-                if((bs->hedge_instruments) != NULL)
-                    _hedge_instruments(bs,i*ds,j*dt,&_output);
+               if((bs->hedge_instruments) != NULL)
+                   _hedge_instruments(bs,i*ds,j*dt,&_output);
 
                 if((bs->apply_cashflow) != NULL)
                     _output.prices[i][j] += bs->apply_cashflow(i*ds,j*dt);
+
+
                 if((bs->apply_coupon) != NULL)
                       _output.prices[i][j] = bs->apply_coupon(i*ds,j*dt);
+
 
             }
 

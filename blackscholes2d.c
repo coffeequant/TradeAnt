@@ -62,6 +62,7 @@ void initialize_blackscholes2d(blackscholes2d *bs)
 	  bs->set_vol_surface = _set_vol_surface2d;
 	  bs->set_rates = _set_rates2d;
 	  bs->apply_cashflow = NULL;
+	  bs->apply_coupon = NULL;
       bs->set_model_parameters = _set_model_parameters2d;
 	  bs->_eps.dimension = 2;
 }
@@ -156,7 +157,7 @@ results2d solve_experimental2d(blackscholes2d* bs,double increment)
 
             	volatility[0] =bs->_blackscholesvol[p].get_vol_with_reftime(&(bs->_blackscholesvol[p]),((nts-k)*dt),(i*ds))+increment;
 				volatility[1] =bs->_blackscholesvol[p].get_vol_with_reftime(&(bs->_blackscholesvol[p]),((nts-k)*dt),(j*ds))+increment;
-
+                printf("%.2f\n",volatility[1]);
                 intrate = bs->_interestrates.get_rate_with_reftime(&(bs->_interestrates),((nts-k)*dt));
 
 
