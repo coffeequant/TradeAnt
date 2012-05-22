@@ -80,7 +80,7 @@ void calc_timestepheston1d(heston1d *hs,results2d *_output,int i,int j,int k)
 	double ds2 = hs->volstepsize;
 	//double variance = j*ds2;
 	double sigma = j*ds2;
-        double q = hs->volofvol/2;
+    double q = hs->volofvol/2;
 
 	_output->prices[k*nas1*nas2+nas2*j+i] = hs->_eps.Bu[i][0]*_output->prices[k*nas1*nas2+nas2*j+i-1];
 	_output->prices[k*nas1*nas2+nas2*j+i]+= hs->_eps.Bu[j][1]*_output->prices[k*nas1*nas2+nas2*(j-1)+i];

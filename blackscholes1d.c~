@@ -198,9 +198,9 @@ results solve_experimental(blackscholes1d* bs,double increment)
             volatility = bs->_blackscholesvol.get_vol_with_reftime(&(bs->_blackscholesvol),((nts-j)*dt),(i*ds))+increment;
             for(i=nas-1;i>=0;i--)
             {
-                Au[i] = 1 - (intrate-divrate)*(i*ds)*dt/ds+0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
+                Au[i] = 1 - intrate*(i*ds)*dt/ds+0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
                 Bu[i] = 0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
-                Eu[i] = -(intrate-divrate)*i*ds*dt/ds;
+                Eu[i] = -intrate*i*ds*dt/ds;
                 Fu[i] = 0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
                 Du[i] = 1 - intrate*dt;
 

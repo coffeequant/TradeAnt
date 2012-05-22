@@ -64,7 +64,7 @@ double dt = 0.01;
 //struct _blackscholes1d* bs,double timeslice,double expiry,double stepsize,int numberofspotsteps)
   // void (*set_model_parameters)(struct _heston1d *hs,double timeslice,double expiry,double stepsize,int numberofspotsteps,double volstepsize,int numberofvolsteps);
    //void (*set_calibration_parameters)(struct _heston1d* hs,double correlation,double meanreversion,double longtermvariance,double volofvol);
-  digital.set_calibration_parameters(&digital,0.3,0.05,0.04,0.1);
+  digital.set_calibration_parameters(&digital,0,0.05,0.04,0.1);
   digital.set_model_parameters(&digital,0.01,0.792,1.0,200,0.005,200);
 
   digital.set_rates(&digital,r,divs);
