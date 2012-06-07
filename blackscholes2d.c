@@ -157,7 +157,6 @@ results2d solve_experimental2d(blackscholes2d* bs,double increment)
 
             	volatility[0] =bs->_blackscholesvol[p].get_vol_with_reftime(&(bs->_blackscholesvol[p]),((nts-k)*dt),(i*ds))+increment;
 				volatility[1] =bs->_blackscholesvol[p].get_vol_with_reftime(&(bs->_blackscholesvol[p]),((nts-k)*dt),(j*ds))+increment;
-                printf("%.2f\n",volatility[1]);
                 intrate = bs->_interestrates.get_rate_with_reftime(&(bs->_interestrates),((nts-k)*dt));
 
 

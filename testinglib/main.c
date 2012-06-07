@@ -1,83 +1,83 @@
-
-/*
- Copyright (C) 2012 Animesh Saxena
-
- This file is part of TradeAnt, a free-software/open-source library
- for traders and practical quantitative analysts
-
- TradeAnt is free software: you can redistribute it. Use it at your own risk
-*/
-
-
 #include <stdio.h>
-#include <tradeant/heston1d.h>
+
+#include <tradeant/blackscholes1d.h>
+
+//sample templates
 
 
-double dip_cashflow(double spot,double time)
-{
-	if(time == 0.0 && spot < 93)
-	{
-		return (-1*(100 - spot));
-	}
-return 0;
-}
-double digital_coupons(double spot,double time)
+double autocall_cashflow(double spot,double timeremaining)
+
 {
 
-//printf("\t%.2f",spot);
-    if(time == (0.0) && spot > 105) { 
-//printf("@@@@"); 
-return 21; }
-   
-    return -1;
+    double payoff = -1;
+
+    if(spot > 105 && timeremaining == 0.0) return 51;
+    if(spot > 105 && timeremaining == 0.25) return 46.75;
+    if(spot > 105 && timeremaining == 0.5) return 42.5;
+    if(spot > 105 && timeremaining == 0.75) return 38.25;
+    if(spot > 105 && timeremaining == 1.0) return 34;
+    if(spot > 105 && timeremaining == 1.25) return 29.75;
+    if(spot > 105 && timeremaining == 1.5) return 25.5;
+    if(spot > 105 && timeremaining == 1.75) return 21.25;
+    if(spot > 105 && timeremaining == 2.0) return 17;
+
+    if(spot <= 80) payoff = 6.5*(3-timeremaining);
+
+    return payoff;
+
 }
+
 
 int main()
 {
+
+
+//First of all set a reference time from which all times will be calculated. Generally it is today but here you can set it to anything...
   //can be today or any other date - format is year,month,day
-double dt = 0.01;
-  setreftime(2012,May,15);
+  setreftime(2012,May,10);
 
   //Volatility Surface
   volsurface v;
+  initialize_volsurface(&v);
+
+  v.scale = 1;
+  v.set_size(&v,70,9);
+//  v.fetch_volatility_surface(&v,"volsurface.csv");
+  v.constantvolatility = 0.21;
+
+  //Interest Rate Curve
   rates r;
   initialize_rates(&r);
-  r.set_constant_rate(&r,0.075);
+  r.set_constant_rate(&r,0.0);
 
- //Dividend Curve
+  //Dividend Curve
   rates divs;
+  initialize_rates(&divs);
+  divs.set_constant_rate(&divs,0.0);
+
+  blackscholes1d autocall;
+  initialize_blackscholes1d(&autocall);
+
+  autocall.set_model_parameters(&autocall,0.005,3.0,1,200);
+  autocall.set_vol_surface(&autocall,v);
+  autocall.set_rates(&autocall,r,divs);
+
+  autocall.apply_coupon = autocall_cashflow;
+  results autocallcalloutput = autocall.solve(&autocall);
 
 
-  int i=0;
-  initialize_volsurface(&v);
-        v.scale = 1;
-        v.set_size(&v,72,9);
-    v.constantvolatility = 0.27;
-   //     v.fetch_volatility_surface(&v,"volsurface.csv");
+int i=0,j=0;
 
-        initialize_rates(&divs);
-        divs.set_constant_rate(&divs,0.0146);	
-
-  heston1d digital;
-  initialize_heston1d(&digital);
-
-//struct _blackscholes1d* bs,double timeslice,double expiry,double stepsize,int numberofspotsteps)
-  // void (*set_model_parameters)(struct _heston1d *hs,double timeslice,double expiry,double stepsize,int numberofspotsteps,double volstepsize,int numberofvolsteps);
-   //void (*set_calibration_parameters)(struct _heston1d* hs,double correlation,double meanreversion,double longtermvariance,double volofvol);
-  digital.set_calibration_parameters(&digital,0.3,0.05,0.04,0.1);
-  digital.set_model_parameters(&digital,0.01,0.792,1.0,200,0.005,200);
-
-  digital.set_rates(&digital,r,divs);
-
-  digital.apply_coupon = digital_coupons;
-  //digital.apply_cashflow = dip_cashflow;
-  results2d digitaloutput = digital.solve(&digital);
-
-int nts = 0.792/dt;
-i = 100;
-for(;i<200;i++)
-	printf("\nPrice:%.5f\t",digitaloutput.get_prices(&digitaloutput,i,40,nts-1));
-
-
-return 0;
+printf("\n*************autocall Call Prices***********\n");
+j=autocall.nts-1;
+{
+  for(i=0;i<autocall.numberofsteps;i++)
+  {
+        printf("%d-->%.2f %.2f\t",i,autocallcalloutput.prices[i][j],autocallcalloutput.vega[i][j]);
+  }
+        printf("\n");
 }
+
+}
+
+
