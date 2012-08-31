@@ -16,7 +16,7 @@
 
 #define LINELENGTH 1000
 #define SEPARATOR ","
-#define VOLCOOKIE "ANIAUR"
+#define VOLCOOKIE "ANIVOL"
 
 //data structure for storing volatility surface
 //need a data structure for representing dates in C and how to add or subtract days to them...maybe a calendar structure
