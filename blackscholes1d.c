@@ -139,11 +139,15 @@ results solve_experimental(blackscholes1d* bs,double increment)
     for(j=0;j<nts;j++)
     {
 
-        //if(j%2==0)
+        if(j%2==0)
         {
             //upstream
             for(i=0;i<nas;i++)
             {
+
+                if((bs->apply_cashflow) != NULL)
+                    _output.prices[i][j] += bs->apply_cashflow(i*ds,j*dt);
+
 
                 intrate = bs->_interestrates.get_rate_with_reftime(&(bs->_interestrates),((nts-j)*dt));
 
@@ -154,7 +158,7 @@ results solve_experimental(blackscholes1d* bs,double increment)
                 Au[i] = 1 - (intrate - divrate)*(i*ds)*dt/ds+0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
                 Bu[i] = 0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
                 Eu[i] = -(intrate-divrate)*i*ds*dt/ds;
-                Fu[i] = 0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);	
+                Fu[i] = 0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
                 Du[i] = 1 - intrate*dt;
                 if(i!=0 && i!=(nas-1) && j>0)
                 {
@@ -177,20 +181,18 @@ results solve_experimental(blackscholes1d* bs,double increment)
                if((bs->hedge_instruments) != NULL)
                    _hedge_instruments(bs,i*ds,j*dt,&_output);
 
-                if((bs->apply_cashflow) != NULL)
-                    _output.prices[i][j] += bs->apply_cashflow(i*ds,j*dt);
 
 
                 if((bs->apply_coupon) != NULL)
-		{
-                      double valueflag = bs->apply_coupon(i*ds,j*dt);
-		      if(valueflag != -1) _output.prices[i][j] = valueflag;
-		}
-
+                {
+                        double valueflag = bs->apply_coupon(i*ds,j*dt);
+                        if(valueflag != -1) _output.prices[i][j] = valueflag;
+                 }
 
             }
 
         }
+        else
         {
             //downstream
             intrate = bs->_interestrates.get_rate_with_reftime(&(bs->_interestrates),((nts-j)*dt));
@@ -206,8 +208,13 @@ results solve_experimental(blackscholes1d* bs,double increment)
 
                 if(i!=(nas-1) && i!=0)
                 _output.prices[i][j] = (Bu[i]*_output.prices[i+1][j]+_output.prices[i][j-1]*Du[i]+_output.prices[i-1][j-1]*Eu[i]+Fu[i]*(_output.prices[i-1][j-1]-_output.prices[i][j-1]))/Au[i];
+
                 if(i==(nas-1))
-                    _output.prices[i][j] = _output.prices[i][j-1];
+                {
+                    _output.prices[i][j]=2*_output.prices[i-1][j-1] - _output.prices[i-2][j-1];
+                }
+
+
                 if(i==0 && j>0)
                     _output.prices[i][j]=_output.prices[i][j-1]*(1-intrate*dt);
 
