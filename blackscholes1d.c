@@ -145,24 +145,34 @@ results solve_experimental(blackscholes1d* bs,double increment)
             for(i=0;i<nas;i++)
             {
 
+                //apply boundary conditions...
+
                 if((bs->apply_cashflow) != NULL)
                     _output.prices[i][j] += bs->apply_cashflow(i*ds,j*dt);
 
+                _apply_cash_flows(bs,j,&_output);
+
+               if((bs->hedge_instruments) != NULL)
+                   _hedge_instruments(bs,i*ds,j*dt,&_output);
+
+                if((bs->apply_coupon) != NULL)
+                {
+                        double valueflag = bs->apply_coupon(i*ds,j*dt);
+                        if(valueflag != -1) _output.prices[i][j] = valueflag;
+                 }
 
                 intrate = bs->_interestrates.get_rate_with_reftime(&(bs->_interestrates),((nts-j)*dt));
-
                 divrate = bs->_dividendrates.get_rate_with_reftime(&(bs->_dividendrates),((nts-j)*dt));
-
                 volatility = bs->_blackscholesvol.get_vol_with_reftime(&(bs->_blackscholesvol),((nts-j)*dt),(i*ds))+increment;
 
-                Au[i] = 1 - (intrate - divrate)*(i*ds)*dt/ds+0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
+                Au[i] = 1 + 0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
                 Bu[i] = 0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
                 Eu[i] = -(intrate-divrate)*i*ds*dt/ds;
                 Fu[i] = 0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
                 Du[i] = 1 - intrate*dt;
                 if(i!=0 && i!=(nas-1) && j>0)
                 {
-                    _output.prices[i][j] = (Bu[i]*_output.prices[i-1][j]+_output.prices[i][j-1]*Du[i]+_output.prices[i-1][j-1]*Eu[i]+(_output.prices[i+1][j-1]-_output.prices[i][j-1])*Fu[i])/Au[i];
+                    _output.prices[i][j] = (Bu[i]*_output.prices[i-1][j]+_output.prices[i][j-1]*Du[i]+(-_output.prices[i][j]+_output.prices[i-1][j])*Eu[i]+(_output.prices[i+1][j-1]-_output.prices[i][j-1])*Fu[i])/Au[i];
                 }
 
                 if(i==0 && j>0)
@@ -174,25 +184,11 @@ results solve_experimental(blackscholes1d* bs,double increment)
                 {
                     _output.prices[i][j]=2*_output.prices[i-1][j] - _output.prices[i-2][j];
                 }
-                 //apply boundary conditions...
-
-                _apply_cash_flows(bs,j,&_output);
-
-               if((bs->hedge_instruments) != NULL)
-                   _hedge_instruments(bs,i*ds,j*dt,&_output);
-
-
-
-                if((bs->apply_coupon) != NULL)
-                {
-                        double valueflag = bs->apply_coupon(i*ds,j*dt);
-                        if(valueflag != -1) _output.prices[i][j] = valueflag;
-                 }
 
             }
 
         }
-        else
+       else
         {
             //downstream
             intrate = bs->_interestrates.get_rate_with_reftime(&(bs->_interestrates),((nts-j)*dt));
@@ -200,24 +196,6 @@ results solve_experimental(blackscholes1d* bs,double increment)
             volatility = bs->_blackscholesvol.get_vol_with_reftime(&(bs->_blackscholesvol),((nts-j)*dt),(i*ds))+increment;
             for(i=nas-1;i>=0;i--)
             {
-                Au[i] = 1 - (intrate-divrate)*(i*ds)*dt/ds+0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
-                Bu[i] = 0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
-                Eu[i] = -(intrate-divrate)*i*ds*dt/ds;
-                Fu[i] = 0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
-                Du[i] = 1 - intrate*dt;
-
-                if(i!=(nas-1) && i!=0)
-                _output.prices[i][j] = (Bu[i]*_output.prices[i+1][j]+_output.prices[i][j-1]*Du[i]+_output.prices[i-1][j-1]*Eu[i]+Fu[i]*(_output.prices[i-1][j-1]-_output.prices[i][j-1]))/Au[i];
-
-                if(i==(nas-1))
-                {
-                    _output.prices[i][j]=2*_output.prices[i-1][j-1] - _output.prices[i-2][j-1];
-                }
-
-
-                if(i==0 && j>0)
-                    _output.prices[i][j]=_output.prices[i][j-1]*(1-intrate*dt);
-
 
                 _apply_cash_flows(bs,j,&_output);
 
@@ -227,16 +205,32 @@ results solve_experimental(blackscholes1d* bs,double increment)
                 if((bs->apply_cashflow) != NULL)
                     _output.prices[i][j] += bs->apply_cashflow(i*ds,j*dt);
 
-	       if((bs->apply_coupon) != NULL)
-		{
+                if((bs->apply_coupon) != NULL)
+                {
                       double valueflag = bs->apply_coupon(i*ds,j*dt);
-		      if(valueflag != -1) _output.prices[i][j] = valueflag;
-		}
+                      if(valueflag != -1) _output.prices[i][j] = valueflag;
+                }
+
+                Au[i] = 1 + (intrate-divrate)*(i*ds)*dt/ds+0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
+                Bu[i] = 0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
+                Eu[i] = -(intrate-divrate)*i*ds*dt/ds;
+                Fu[i] = 0.5*volatility*volatility*i*ds*i*ds*dt/(ds*ds);
+                Du[i] = 1 - intrate*dt;
+
+                if(i!=(nas-1) && i!=0)
+                    _output.prices[i][j] = (Bu[i]*_output.prices[i+1][j]+_output.prices[i][j-1]*Du[i]+_output.prices[i-1][j-1]*Eu[i]+Fu[i]*(_output.prices[i-1][j-1]-_output.prices[i][j-1]))/Au[i];
+
+                if(i==(nas-1))
+                {
+                    _output.prices[i][j]=2*_output.prices[i-1][j-1] - _output.prices[i-2][j-1];
+                }
+
+                if(i==0 && j>0)
+                    _output.prices[i][j]=_output.prices[i][j-1]*(1-intrate*dt);
             }
         }
 
      }
-
 
 return _output;
 }

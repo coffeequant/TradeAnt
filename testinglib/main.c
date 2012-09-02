@@ -16,6 +16,7 @@ double callspread_cashflow(double spot,double timeremaining)
         double buycallprice = max(spot-99,0);
         double sellcallprice = max(spot-100,0);
         return 15*(buycallprice-sellcallprice);
+        //return sellcallprice;
     }
     return 0;
 }
@@ -73,7 +74,7 @@ int main()
   digital.set_vol_surface(&digital,v);
   digital.set_rates(&digital,r,divs);
 
- callspread.set_model_parameters(&callspread,0.005,1.0,1,200);
+ callspread.set_model_parameters(&callspread,0.001,1.0,1,200);
   callspread.set_vol_surface(&callspread,v);
   callspread.set_rates(&callspread,r,divs);
 
@@ -87,7 +88,7 @@ int main()
 
 int i=0,j=0;
 
-j=100;
+j=callspread.nts-1;
 i=100;
 
 //printf("%d,%.4f\n",i,1*(callspreadout.prices[199][10]));
@@ -95,7 +96,7 @@ i=100;
 
   for(i=0;i<digital.numberofsteps-1;i++)
   {
-        printf("%d,%.4f\n",i,1*(digitalout.prices[i+1][j]));
+        printf("%d,%.4f\n",i,1*(callspreadout.prices[i][j]));
   }
         printf("%d,%.4f\n",i,100*0);
         printf("\n");
