@@ -14,7 +14,7 @@
 
 #include <tradeant/volatility.h>
 
-#define LINELENGTH 1000
+#define LINELENGTH 5000
 #define SEPARATOR ","
 #define VOLCOOKIE "ANIAUR"
 
@@ -100,29 +100,35 @@ void _fetch_volatility_surface(volsurface *csvvol,char* filename)
         exit(1);
       	}
       int i=0,j=0,k=0;
+      
      while(i<=csvvol->matcount)
 	 {
 	  fgets(newline,LINELENGTH,fp);
 	  //split strikes it into comma separated values
 	  if(i==0)
 	    {
-	      	char* strike1;
-	      	strike1=strtok(newline,SEPARATOR);
+	      	double strike1;
+	      	strike1=atof(strtok(newline,SEPARATOR));
+		csvvol->strikes[0]=strike1;
 
 		for(k=1;k<csvvol->strikecount;k++)
-	      		csvvol->strikes[k]=atof(strtok(NULL,SEPARATOR));
-		csvvol->strikes[0]=atof(strike1);
-          }
+		{	
+			strike1 = atof(strtok(NULL,SEPARATOR));
+	      		csvvol->strikes[k]=strike1;
+		}
+	  }
 	  else
 	  {
-	      	char *date;
-		date=strtok(newline,SEPARATOR);
+	      	char *date1;
+		double vol;
+		date1=strtok(newline,SEPARATOR);
 	      for(k=0;k<csvvol->strikecount;k++) {
-		csvvol->volatility[i-1][k] = atof(strtok(NULL,SEPARATOR))*csvvol->scale;
+		vol = atof(strtok(NULL,SEPARATOR));
+		csvvol->volatility[i-1][k] = vol;
 		}
-        csvvol->absolute_maturities[j].initstringdate(&csvvol->absolute_maturities[j],date);
+       csvvol->absolute_maturities[j].initstringdate(&csvvol->absolute_maturities[j],date1);
 		csvvol->maturities[j] = csvvol->absolute_maturities[j].difference;
-		//printf("%.2f",csvvol->volatility[0]);
+
         j++;
 	  }
 	  //vol surface loaded
@@ -161,7 +167,6 @@ if(difference > csvvol->maturities[csvvol->matcount-1])
         date1 = date1 - 1;
         date2 = date2 - 1;
     }
-//	printf("%f %d",csvvol->strikes[0],date1);exit(0);
 
     for(i=0;i<csvvol->strikecount;i++) {
       v1array[i] = csvvol->volatility[date1][i];

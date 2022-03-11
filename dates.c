@@ -8,7 +8,7 @@
 */
 
 
-#include "dates.h"
+#include <tradeant/dates.h>
 #include <string.h>
 
 void setreftime(int Year,int months,int day)
@@ -51,13 +51,9 @@ void _initstringdate(qdate *q,char *a)
   {
     char s[25];
 	strcpy(s,a);
-//a	printf("%s",s);
-//	exit(0);
-    int d = atoi(strtok(s,"\/"));
-    int m = atoi(strtok(NULL,"\/"));
-    int year = 2000+atoi(strtok(NULL,"\/"));
- //   printf("%d %d %D",d,m,year);
-//	exit(0);
+    int d = atoi(strtok(s,"-"));
+    int m = atoi(strtok(NULL,"-"));
+    int year = atoi(strtok(NULL,"-"));
     q->str_time.tm_year=year-1900;
     q->str_time.tm_mon = m;
     q->str_time.tm_mday = d;

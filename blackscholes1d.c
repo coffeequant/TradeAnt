@@ -24,7 +24,7 @@ results solvebs_implicit(blackscholes1d*,double);
 
 void initialize_blackscholes1d(blackscholes1d *bs)
 {
-//	  bs->solve = solvebs_explicit;
+	 // bs->solve = solvebs_explicit;
 	  bs->solve = solvebs;
 	  bs->set_vol_surface = _set_vol_surface;
 	  bs->set_rates = _set_rates;
@@ -118,13 +118,11 @@ results solve_experimental(blackscholes1d* bs,double increment)
 
     double dt = bs->dt;
     int i,j;
-
     double ds = bs->stepsize;
     int nts = bs->expiry/dt;
     int nas = bs->numberofsteps;
     bs->nts = nts;
     results _output;
-
     _init_results(&_output,bs->numberofsteps,bs->nts);
     double *Au = (double*)malloc(sizeof(double)*nas);
     double *Bu = (double*)malloc(sizeof(double)*nas);
@@ -132,8 +130,6 @@ results solve_experimental(blackscholes1d* bs,double increment)
     double *Eu = (double*)malloc(sizeof(double)*nas);
     double *Fu = (double*)malloc(sizeof(double)*nas);
     double volatility,intrate,divrate;
-
-
     for(j=0;j<nts;j++)
     {
 
@@ -151,17 +147,17 @@ results solve_experimental(blackscholes1d* bs,double increment)
 
                         _apply_cash_flows(bs,j,&_output);
 
-                        if((bs->hedge_instruments) != NULL)
-                            _hedge_instruments(bs,i*ds,j*dt,&_output);
-
+                        //if((bs->hedge_instruments) != NULL)
+                        //    _hedge_instruments(bs,i*ds,j*dt,&_output);
+			
                         if((bs->apply_coupon) != NULL)
                         {
                             double valueflag = bs->apply_coupon(i*ds,j);
                             if(valueflag != -1) _output.prices[i][j] = valueflag;
                         }
+			
                 }
-
-                intrate = bs->_interestrates.get_rate_with_reftime(&(bs->_interestrates),((nts-j)*dt));
+                intrate =  bs->_interestrates.get_rate_with_reftime(&(bs->_interestrates),((nts-j)*dt));
                 divrate = bs->_dividendrates.get_rate_with_reftime(&(bs->_dividendrates),((nts-j)*dt));
                 volatility = bs->_blackscholesvol.get_vol_with_reftime(&(bs->_blackscholesvol),((nts-j)*dt),(i*ds))+increment;
 
@@ -192,8 +188,8 @@ results solve_experimental(blackscholes1d* bs,double increment)
 
                         _apply_cash_flows(bs,j,&_output);
 
-                        if((bs->hedge_instruments) != NULL)
-                            _hedge_instruments(bs,i*ds,j*dt,&_output);
+                        //if((bs->hedge_instruments) != NULL)
+                        //    _hedge_instruments(bs,i*ds,j*dt,&_output);
 
                         if((bs->apply_coupon) != NULL)
                         {
@@ -233,8 +229,8 @@ results solve_experimental(blackscholes1d* bs,double increment)
 
                 _apply_cash_flows(bs,j,&_output);
 
-                if((bs->hedge_instruments) != NULL)
-                    _hedge_instruments(bs,i*ds,j*dt,&_output);
+                //if((bs->hedge_instruments) != NULL)
+                //    _hedge_instruments(bs,i*ds,j*dt,&_output);
 
                 if((bs->apply_cashflow) != NULL)
                     _output.prices[i][j] += bs->apply_cashflow(i*ds,j);
@@ -329,13 +325,9 @@ return _output;
 //Implcit schemes will always be preferred for 1D
 results solvebs(blackscholes1d* bs)
 {
-
 	double inc = 0.0;
-	results _output = solve_experimental(bs,inc);
-
-
+	results _output = solve_experimental(bs,0.0);
 	results _output_2 = solve_experimental(bs,inc+0.01);
-
 	int i,j;
 	for(j=0;j<bs->nts;j++)
 	{
@@ -351,7 +343,6 @@ results solvebs(blackscholes1d* bs)
 				_output.theta[i][j] = (_output.prices[i][j-1] - _output.prices[i][j])/(bs->dt);
 		}
 	}
-
 	//results _output_2 = solvebs_implicit(bs,0.01);
 	//compute vega here - animesh
 	return _output;

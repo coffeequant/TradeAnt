@@ -17,7 +17,7 @@
 #define SEPARATOR ","
 #define RATECOOKIE "ANIRATE"
 
-
+struct tm _globalref;
 //need interest rate and dividend curves both
 //taken from volsurface file
 double interpolate(double*,double*,double,int);

@@ -11,7 +11,7 @@
 #include <time.h>
 #ifndef _dates_
 #define _dates_
-struct tm _globalref;
+extern struct tm _globalref;
 
 typedef enum _months {Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec} months;
 //date format will be like date(year,month,day)

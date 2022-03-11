@@ -1,6 +1,9 @@
 #include <stdio.h>
-
+#include <stdlib.h>
 #include <tradeant/blackscholes1d.h>
+
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
 //sample templates
 
@@ -20,12 +23,9 @@ double digital_cashflow(double spot,double timeremaining)
 
 {
 
-    double a;
-
-    if(spot < 90 && timeremaining == 0.0) return 13;
-
-    else return 0.0;
-
+    double payoff = 0.0;
+    if(spot >=105 && timeremaining == 0.0) payoff = MAX(0.0,spot - 105.0);
+    return payoff;
 }
 
 
@@ -46,20 +46,20 @@ double digital2_cashflow(double spot,double timeremaining)
 }
 
 
-int main()
+int main(int argc,char *argv[])
 {
-
 
 //First of all set a reference time from which all times will be calculated. Generally it is today but here you can set it to anything...
   //can be today or any other date - format is year,month,day
-  setreftime(2012,May,10);
-
+  setreftime(2022,2,10);
   //Volatility Surface
   volsurface v;
   initialize_volsurface(&v);
 
-  v.scale = 1;
-  v.set_size(&v,70,9);
+//  v.scale = 1;
+//  v.constantvolatility = 0.20;
+
+  v.set_size(&v,55,9);
   v.fetch_volatility_surface(&v,"volsurface.csv");
 
 
@@ -67,7 +67,7 @@ int main()
   rates r;
   initialize_rates(&r);
   r.set_constant_rate(&r,0.0);
-
+	
   //Dividend Curve
   rates divs;
   initialize_rates(&divs);
@@ -76,7 +76,9 @@ int main()
   blackscholes1d digital;
   initialize_blackscholes1d(&digital);
 
-  digital.set_model_parameters(&digital,0.005,1.25,1,200);
+  //timeslice, expiry,stepsize,numberofspots
+
+  digital.set_model_parameters(&digital,0.005,1.00,1,400);
   digital.set_vol_surface(&digital,v);
   digital.set_rates(&digital,r,divs);
 
@@ -84,22 +86,22 @@ int main()
   digital.apply_cashflow = digital_cashflow;
   results digitalcalloutput = digital.solve(&digital);
 
-  digital.apply_cashflow = digital2_cashflow;
-  results digitalputoutput = digital.solve(&digital);
 
 
 int i=0,j=0;
 
-printf("\n*************Digital Call Prices***********\n");
-j=digital.nts-1;
-{
-  for(i=0;i<digital.numberofsteps;i++)
-  {
-        printf("%.2f\t",digitalcalloutput.prices[i][j]);
-  }
-        printf("\n");
-}
+//printf("\n*************Digital Call Prices***********\n");
 
+j=digital.nts-1;
+
+//printf("%.2f\n\n",digitalcalloutput.prices[100][j]);
+
+for(i=0;i<digital.numberofsteps;i++)
+{
+	printf("%.2f,",digitalcalloutput.vega[i][j]);
+}
+//printf("\n\n\n");
+return 0;
 }
 
 
