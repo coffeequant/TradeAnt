@@ -24,7 +24,7 @@ double digital_cashflow(double spot,double timeremaining)
 {
 
     double payoff = 0.0;
-    if(spot >=105 && timeremaining == 0.0) payoff = MAX(0.0,spot - 105.0);
+    if(spot >=105 && timeremaining == 0.0) payoff = 10.0;
     return payoff;
 }
 
@@ -98,7 +98,7 @@ j=digital.nts-1;
 
 for(i=0;i<digital.numberofsteps;i++)
 {
-	printf("%.2f,",digitalcalloutput.vega[i][j]);
+	printf("%.5f\n",digitalcalloutput.delta[i][j]);
 }
 //printf("\n\n\n");
 return 0;
